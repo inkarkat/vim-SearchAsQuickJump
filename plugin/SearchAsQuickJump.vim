@@ -168,19 +168,11 @@ cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
 vnoremap <Plug>SearchAsQuickJumpStar  :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 1, 0)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
 vnoremap <Plug>SearchAsQuickJumpHash  :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 1, 1)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
-vnoremap <Plug>SearchAsQuickJumpGStar :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 0, 0)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
-vnoremap <Plug>SearchAsQuickJumpGHash :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 0, 1)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'v')
     vmap <Tab> <Plug>SearchAsQuickJumpStar
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'v')
     vmap <S-Tab> <Plug>SearchAsQuickJumpHash
-endif
-if ! hasmapto('<Plug>SearchAsQuickJumpGStar', 'v')
-    vmap g<Tab> <Plug>SearchAsQuickJumpGStar
-endif
-if ! hasmapto('<Plug>SearchAsQuickJumpGHash', 'v')
-    vmap g<S-Tab> <Plug>SearchAsQuickJumpGHash
 endif
 
 nmap <silent> goq <Plug>SearchAsQuickJumpNext
