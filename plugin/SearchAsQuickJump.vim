@@ -45,8 +45,8 @@
 "			If the SearchRepeat plugin is installed, the 'n/N' keys
 "			are reprogrammed to repeat the quick search. 
 "
-" {Visual}<Tab>		Do a quick search forward / backward for the [count]'th
-" {Visual}<S-Tab>	occurrence of the current selection, like the built-in
+" {Visual}q*		Do a quick search forward / backward for the [count]'th
+" {Visual}q#	    	occurrence of the current selection, like the built-in
 "			|g*| and |g#| commands. 
 "
 "			If the SearchRepeat plugin is installed, the 'n/N' keys
@@ -107,21 +107,25 @@ nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWit
 
 
 "- functions ------------------------------------------------------------------
-function! s:Jump( isBackward )
-    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, function('SearchAsQuickJump#Predicate'), 'quick', '', 1)
+function! s:Jump( count, isBackward )
+    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, function('SearchAsQuickJump#Predicate'), 'quick', '', a:count)
     if a:isBackward
 	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})
     else
 	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})
     endif
 endfunction
-function! s:SearchSelection( text, isWholeWordSearch, isBackward )
+function! s:SearchCWord( isWholeWordSearch, isBackward )
+    let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(expand('<cword>'), a:isWholeWordSearch, '')
+    call s:Jump(v:count1, a:isBackward)
+endfunction
+function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
     let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(a:text, a:isWholeWordSearch, '')
-    call s:Jump(a:isBackward)
+    call s:Jump(a:count, a:isBackward)
 endfunction
 function! SearchAsQuickJump#Jump( isBackward )
     call histdel('/', -1)
-    call s:Jump(a:isBackward)
+    call s:Jump(1, a:isBackward)
 endfunction
 function! s:QuickSearch()
     if getcmdtype() ==# '/'
@@ -166,13 +170,29 @@ cnoremap <expr> <SID>QuickSearch <SID>QuickSearch()
 cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
 
-vnoremap <Plug>SearchAsQuickJumpStar  :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 1, 0)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
-vnoremap <Plug>SearchAsQuickJumpHash  :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 1, 1)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
+nnoremap <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)<CR>
+nnoremap <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchCWord(1, 1)<CR>
+nnoremap <Plug>SearchAsQuickJumpGStar :<C-u>call <SID>SearchCWord(0, 0)<CR>
+nnoremap <Plug>SearchAsQuickJumpGHash :<C-u>call <SID>SearchCWord(0, 1)<CR>
+vnoremap <Plug>SearchAsQuickJumpStar  :<C-u>let save_unnamedregister = @@<Bar>let save_count=v:count1<CR>gvy:<C-u>call <SID>SearchSelection(@@, save_count, 0, 0)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<Bar>unlet save_count<CR>
+vnoremap <Plug>SearchAsQuickJumpHash  :<C-u>let save_unnamedregister = @@<Bar>let save_count=v:count1<CR>gvy:<C-u>call <SID>SearchSelection(@@, save_count, 0, 1)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<Bar>unlet save_count<CR>
+if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'n')
+    nmap <silent> q* <Plug>SearchAsQuickJumpStar
+endif
+if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'n')
+    nmap <silent> q# <Plug>SearchAsQuickJumpHash
+endif
+if ! hasmapto('<Plug>SearchAsQuickJumpGStar', 'n')
+    nmap <silent> gq* <Plug>SearchAsQuickJumpGStar
+endif
+if ! hasmapto('<Plug>SearchAsQuickJumpGHash', 'n')
+    nmap <silent> gq# <Plug>SearchAsQuickJumpGHash
+endif
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'v')
-    vmap <Tab> <Plug>SearchAsQuickJumpStar
+    vmap <silent> q* <Plug>SearchAsQuickJumpStar
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'v')
-    vmap <S-Tab> <Plug>SearchAsQuickJumpHash
+    vmap <silent> q# <Plug>SearchAsQuickJumpHash
 endif
 
 nmap <silent> goq <Plug>SearchAsQuickJumpNext
