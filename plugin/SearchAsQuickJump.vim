@@ -23,27 +23,34 @@
 "   of matches are vital and central to the task. 
 "
 "   How can this be reconciled? This plugin sets up alternative mappings to the
-"   <CR> which normally concludes entering of the search pattern in command-line
-"   mode. By pressing <S-CR>, a quick search is triggered instead of a normal
-"   one. This quick search does not use search highlighting and the search
-"   pattern is not added to the search history, so it can be used independent of
-"   the normal search. Next / previous matches can be jumped to via separate
-"   mappings, or (if the integration with the SearchRepeat plugin is used) also
-"   via the default |n| / |N| commands. 
+"   <CR> key which normally concludes entering of the search pattern in
+"   command-line mode. By pressing <S-CR>, a quick search is triggered instead
+"   of a normal one. This quick search does not use search highlighting and the
+"   search pattern is not added to the search history, so it can be used without
+"   affecting the normal search. 
+"   
+"   Next / previous matches can be jumped to via separate mappings, or (if the
+"   integration with the SearchRepeat plugin is used) also via the default |n| /
+"   |N| commands. 
 "
 " USAGE:
-" /{pattern}[/]<S-CR>
-" ?{pattern}[?]<S-CR>
-"			When a search via |/| or |?| is sent off by pressing
-"			<S-CR>, a quick forward / backward search is performed. 
+" /{pattern}[/]<S-CR>	When a search via |/| or |?| is sent off by pressing
+" ?{pattern}[?]<S-CR>	<S-CR>, a quick forward / backward search is performed.
 "			Matches will not be highlighted via 'hlsearch', and the
 "			search pattern will not be added to the search history. 
 "			Use this for a quick search without the formality and
 "			persistence of a normal search, which can still be
 "			obtained by pressing <CR> at the end. 
 "
-"   If the SearchRepeat plugin is installed, the 'n/N' keys are reprogrammed to
-"   repeat the quick search. 
+"			If the SearchRepeat plugin is installed, the 'n/N' keys
+"			are reprogrammed to repeat the quick search. 
+"
+" {Visual}<Tab>		Do a quick search forward / backward for the [count]'th
+" {Visual}<S-Tab>	occurrence of the current selection, like the built-in
+"			|g*| and |g#| commands. 
+"
+"			If the SearchRepeat plugin is installed, the 'n/N' keys
+"			are reprogrammed to repeat the quick search. 
 "
 " [count]goq / goQ	Search forward / backward to the [count]'th occurrence
 "			of the quick search pattern. 
@@ -60,6 +67,7 @@
 
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher. 
+"   - SearchHighlighting.vim autoload script. 
 "   - SearchSpecial.vim autoload script. 
 "   - SearchRepeat.vim autoload script (optional integration). 
 
@@ -91,18 +99,29 @@ function! SearchAsQuickJump#Predicate( isBackward )
 endfunction
 
 "- use of SearchSpecial library -----------------------------------------------
-function! s:GetPattern()
+function! s:GetQuickSearchPattern()
     return s:quickSearchPattern
 endfunction
-nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call SearchSpecial#SearchWithout(<SID>GetPattern(), 0, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
-nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWithout(<SID>GetPattern(), 1, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 0, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 1, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
 
 
 "- functions ------------------------------------------------------------------
+function! s:Jump( isBackward )
+    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, function('SearchAsQuickJump#Predicate'), 'quick', '', 1)
+    if a:isBackward
+	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})
+    else
+	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})
+    endif
+endfunction
+function! s:SearchSelection( text, isWholeWordSearch, isBackward )
+    let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(a:text, a:isWholeWordSearch, '')
+    call s:Jump(a:isBackward)
+endfunction
 function! SearchAsQuickJump#Jump( isBackward )
-    call SearchSpecial#SearchWithout(s:GetPattern(), a:isBackward, function('SearchAsQuickJump#Predicate'), 'quick', '', 1)
     call histdel('/', -1)
-    silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})
+    call s:Jump(a:isBackward)
 endfunction
 function! s:QuickSearch()
     if getcmdtype() ==# '/'
@@ -146,6 +165,23 @@ cnoremap <expr> <SID>QuickSearch <SID>QuickSearch()
 " with it).  
 cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
+
+vnoremap <Plug>SearchAsQuickJumpStar  :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 1, 0)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
+vnoremap <Plug>SearchAsQuickJumpHash  :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 1, 1)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
+vnoremap <Plug>SearchAsQuickJumpGStar :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 0, 0)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
+vnoremap <Plug>SearchAsQuickJumpGHash :<C-u>let save_unnamedregister = @@<CR>gvy:<C-u>call <SID>SearchSelection(@@, 0, 1)<Bar>let @@ = save_unnamedregister<Bar>unlet save_unnamedregister<CR>
+if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'v')
+    vmap <Tab> <Plug>SearchAsQuickJumpStar
+endif
+if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'v')
+    vmap <S-Tab> <Plug>SearchAsQuickJumpHash
+endif
+if ! hasmapto('<Plug>SearchAsQuickJumpGStar', 'v')
+    vmap g<Tab> <Plug>SearchAsQuickJumpGStar
+endif
+if ! hasmapto('<Plug>SearchAsQuickJumpGHash', 'v')
+    vmap g<S-Tab> <Plug>SearchAsQuickJumpGHash
+endif
 
 nmap <silent> goq <Plug>SearchAsQuickJumpNext
 nmap <silent> goQ <Plug>SearchAsQuickJumpPrev
