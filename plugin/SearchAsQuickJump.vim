@@ -76,7 +76,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
-"	001	00-Jan-2009	file creation
+"	002	11-Jul-2009	First working version. 
+"	001	10-Jul-2009	file creation
 
 " Avoid installing twice or when in unsupported Vim version. 
 if exists('g:loaded_SearchAsQuickJump') || (v:version < 700)
@@ -89,9 +90,9 @@ function! SearchAsQuickJump#Predicate( isBackward )
     return 1
 endfunction
 
-"- use of SearchHighlighting library ------------------------------------------
+"- use of SearchSpecial library -----------------------------------------------
 function! s:GetPattern()
-    return SearchHighlighting#GetSearchPattern(s:quickSearchPattern, 0, '')
+    return s:quickSearchPattern
 endfunction
 nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call SearchSpecial#SearchWithout(<SID>GetPattern(), 0, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
 nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWithout(<SID>GetPattern(), 1, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
@@ -101,7 +102,7 @@ nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWit
 function! SearchAsQuickJump#Jump( isBackward )
     call SearchSpecial#SearchWithout(s:GetPattern(), a:isBackward, function('SearchAsQuickJump#Predicate'), 'quick', '', 1)
     call histdel('/', -1)
-    silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2)
+    silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})
 endfunction
 function! s:QuickSearch()
     if getcmdtype() ==# '/'
@@ -154,8 +155,8 @@ nmap <silent> goQ <Plug>SearchAsQuickJumpPrev
 try
     call SearchRepeat#Register("\<Plug>SearchAsQuickJumpNext", '/<S-CR>', 'gnq', 'Quick search forward', '')
     call SearchRepeat#Register("\<Plug>SearchAsQuickJumpPrev", '?<S-CR>', 'gnQ', 'Quick search backward', '')
-    nnoremap <silent> gnq :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2)<CR>
-    nnoremap <silent> gnQ :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2)<CR>
+    nnoremap <silent> gnq :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})<CR>
+    nnoremap <silent> gnQ :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})<CR>
 catch /^Vim\%((\a\+)\)\=:E117/	" catch error E117: Unknown function
 endtry
 
