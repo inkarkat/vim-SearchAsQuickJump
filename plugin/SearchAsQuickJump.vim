@@ -45,6 +45,11 @@
 "			If the SearchRepeat plugin is installed, the 'n/N' keys
 "			are reprogrammed to repeat the quick search. 
 "
+" q*, q#		Search forward / backward for the [count]'th occurrence
+"			of the word nearest to the cursor.
+" gq*, gq#		Like above, but don't put "\<" and "\>" around the word.
+"			This makes the search also find matches that are not a
+"			whole word. 
 " {Visual}q*		Do a quick search forward / backward for the [count]'th
 " {Visual}q#	    	occurrence of the current selection, like the built-in
 "			|g*| and |g#| commands. 
@@ -69,6 +74,7 @@
 "   - Requires Vim 7.0 or higher. 
 "   - SearchHighlighting.vim autoload script. 
 "   - SearchSpecial.vim autoload script. 
+"   - SearchSpecialCWord.vim autoload script. 
 "   - SearchRepeat.vim autoload script (optional integration). 
 
 " CONFIGURATION:
@@ -77,6 +83,10 @@
 " ASSUMPTIONS:
 " KNOWN PROBLEMS:
 " TODO:
+" - Handle trailing /, ?. 
+" - Warning if {offset} is specified. 
+" - Handle {offset}. 
+" - No 'smartcase' for "Star" and "Hash" mappings. 
 "
 " Copyright: (C) 2009 by Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'. 
@@ -84,6 +94,17 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	003	12-Jul-2009	Added parallel mappings for the '*' and '#'
+"				commands in normal mode. 
+"				BF: Backward search from inside the current word
+"				jumped to the beginning of the current word, not
+"				the previous match. Enhanced
+"				SearchSpecial#SearchWithout() function to take
+"				an optional l:cwordStartPosition and skip this
+"				during backward searches. 
+"				Enhanced SearchSpecial#SearchWithout() function
+"				now allows to pass in empty predicate, removing
+"				the need for a dummy "always true" predicate. 
 "	002	11-Jul-2009	First working version. 
 "	001	10-Jul-2009	file creation
 
@@ -93,22 +114,17 @@ if exists('g:loaded_SearchAsQuickJump') || (v:version < 700)
 endif
 let g:loaded_SearchAsQuickJump = 1
 
-function! SearchAsQuickJump#Predicate( isBackward )
-    " All matches are valid. 
-    return 1
-endfunction
-
 "- use of SearchSpecial library -----------------------------------------------
 function! s:GetQuickSearchPattern()
     return s:quickSearchPattern
 endfunction
-nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 0, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
-nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 1, function('SearchAsQuickJump#Predicate'), 'quick', '', v:count1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 0, '', 'quick', '', v:count1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 1, '', 'quick', '', v:count1)<CR>
 
 
 "- functions ------------------------------------------------------------------
-function! s:Jump( count, isBackward )
-    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, function('SearchAsQuickJump#Predicate'), 'quick', '', a:count)
+function! s:Jump( count, isBackward, ... )
+    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, (a:0 ? a:1 : [0, 0]))
     if a:isBackward
 	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})
     else
@@ -117,7 +133,8 @@ function! s:Jump( count, isBackward )
 endfunction
 function! s:SearchCWord( isWholeWordSearch, isBackward )
     let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(expand('<cword>'), a:isWholeWordSearch, '')
-    call s:Jump(v:count1, a:isBackward)
+    let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [0, 0])
+    call s:Jump(v:count1, a:isBackward, l:cwordStartPosition)
 endfunction
 function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
     let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(a:text, a:isWholeWordSearch, '')
