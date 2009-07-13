@@ -42,7 +42,8 @@
 "			persistence of a normal search, which can still be
 "			obtained by pressing <CR> at the end. 
 "
-"			If the SearchRepeat plugin is installed, the 'n/N' keys
+"			If the SearchRepeat plugin is installed, a jump to the
+"			[count]'th occurrence is supported and the 'n/N' keys
 "			are reprogrammed to repeat the quick search. 
 "
 " q*, q#		Search forward / backward for the [count]'th occurrence
@@ -94,6 +95,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	004	14-Jul-2009	Now handling optional [count] with the aid of
+"				the SearchRepeat plugin. 
 "	003	12-Jul-2009	Added parallel mappings for the '*' and '#'
 "				commands in normal mode. 
 "				BF: Backward search from inside the current word
@@ -140,9 +143,16 @@ function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
     let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(a:text, a:isWholeWordSearch, '')
     call s:Jump(a:count, a:isBackward)
 endfunction
-function! SearchAsQuickJump#Jump( isBackward )
+function! SearchAsQuickJump#JumpAfterSearch( isBackward )
     call histdel('/', -1)
-    call s:Jump(1, a:isBackward)
+
+    " If the SearchRepeat plugin is installed, it provides the [count] given to
+    " the last search command for other consumers. Otherwise, we do not support
+    " [count], as that would mean remapping the / and ? commands just to record
+    " the [count]. 
+    let l:count = ((exists('g:lastSearchCount') && g:lastSearchCount) ? g:lastSearchCount : 1)
+
+    call s:Jump(l:count, a:isBackward)
 endfunction
 function! s:QuickSearch()
     if getcmdtype() ==# '/'
@@ -156,7 +166,7 @@ function! s:QuickSearch()
     let s:quickSearchPattern = strpart(getcmdline(), 0, strlen(getcmdline()) - s:NoHistoryMarkerLen)
     " Note: Must use CTRL-C to abort search command-line; <Esc> somehow doesn't
     " work. 
-    return "\<C-c>:call SearchAsQuickJump#Jump(" . l:isBackward . ")\<CR>"
+    return "\<C-c>:call SearchAsQuickJump#JumpAfterSearch(" . l:isBackward . ")\<CR>"
 endfunction
 
 
