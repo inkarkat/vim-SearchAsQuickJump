@@ -55,6 +55,10 @@
 " {Visual}q#	    	occurrence of the current selection, like the built-in
 "			|g*| and |g#| commands. 
 "
+"			These mappings are based on the built-in |star| and |#|
+"			commands. Like with them, 'ignorecase' is used,
+"			'smartcase' is not. 
+"
 "			If the SearchRepeat plugin is installed, the 'n/N' keys
 "			are reprogrammed to repeat the quick search. 
 "
@@ -87,7 +91,6 @@
 " - Handle trailing /, ?. 
 " - Warning if {offset} is specified. 
 " - Handle {offset}. 
-" - No 'smartcase' for "Star" and "Hash" mappings. 
 "
 " Copyright: (C) 2009 by Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'. 
@@ -97,6 +100,15 @@
 " REVISION	DATE		REMARKS 
 "	004	14-Jul-2009	Now handling optional [count] with the aid of
 "				the SearchRepeat plugin. 
+"				The "Star" and "Hash" mappings do not use the
+"				'smartcase' setting any more, like the built-in
+"				* and # commands on which they are based. To
+"				maintain a single "quick search" integration
+"				into SearchRepeat, the search type (/ vs. *) is
+"				stored in the s:isStarSearch flag, so that a
+"				single set of <Plug>SearchAsQuickJumpNext
+"				mappings can be registered and used for both
+"				searches using / not using 'smartcase'. 
 "	003	12-Jul-2009	Added parallel mappings for the '*' and '#'
 "				commands in normal mode. 
 "				BF: Backward search from inside the current word
@@ -118,32 +130,46 @@ endif
 let g:loaded_SearchAsQuickJump = 1
 
 "- use of SearchSpecial library -----------------------------------------------
-function! s:GetQuickSearchPattern()
-    return s:quickSearchPattern
+function! s:DoSearch( count, isBackward, ... )
+    if s:isStarSearch
+	" The search function uses the 'ignorecase' and 'smartcase' settings.
+	" For this clone of the '*' command, the 'smartcase' setting doesn't make
+	" sense: A jump to an all-lowercase <cword> would suddenly change all future
+	" matches to lowercase, too. 
+	let l:save_smartcase = &smartcase
+	set nosmartcase
+    endif
+    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, (a:0 ? a:1 : [0, 0]))
+    if s:isStarSearch
+	let &smartcase = l:save_smartcase
+    endif
 endfunction
-nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 0, '', 'quick', '', v:count1)<CR>
-nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call SearchSpecial#SearchWithout(<SID>GetQuickSearchPattern(), 1, '', 'quick', '', v:count1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call <SID>DoSearch(v:count1, 0)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call <SID>DoSearch(v:count1, 1)<CR>
 
 
 "- functions ------------------------------------------------------------------
-function! s:Jump( count, isBackward, ... )
-    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, (a:0 ? a:1 : [0, 0]))
+function! s:SearchAndSetRepeat( count, isBackward, ... )
+    call s:DoSearch(a:count, a:isBackward, (a:0 ? a:1 : [0, 0]))
     if a:isBackward
 	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})
     else
 	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})
     endif
 endfunction
+function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
+    let s:isStarSearch = 1
+    let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(a:text, a:isWholeWordSearch, '')
+    call s:SearchAndSetRepeat(a:count, a:isBackward, a:cwordStartPosition)
+endfunction
 function! s:SearchCWord( isWholeWordSearch, isBackward )
-    let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(expand('<cword>'), a:isWholeWordSearch, '')
     let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [0, 0])
-    call s:Jump(v:count1, a:isBackward, l:cwordStartPosition)
+    call s:SearchText(expand('<cword>'), v:count1, a:isWholeWordSearch, a:isBackward, l:cwordStartPosition)
 endfunction
 function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
-    let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(a:text, a:isWholeWordSearch, '')
-    call s:Jump(a:count, a:isBackward)
+    call s:SearchText(a:text, a:count, a:isWholeWordSearch, a:isBackward, [0, 0])
 endfunction
-function! SearchAsQuickJump#JumpAfterSearch( isBackward )
+function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
     call histdel('/', -1)
 
     " If the SearchRepeat plugin is installed, it provides the [count] given to
@@ -152,7 +178,7 @@ function! SearchAsQuickJump#JumpAfterSearch( isBackward )
     " the [count]. 
     let l:count = ((exists('g:lastSearchCount') && g:lastSearchCount) ? g:lastSearchCount : 1)
 
-    call s:Jump(l:count, a:isBackward)
+    call s:SearchAndSetRepeat(l:count, a:isBackward)
 endfunction
 function! s:QuickSearch()
     if getcmdtype() ==# '/'
@@ -163,10 +189,11 @@ function! s:QuickSearch()
 	return "\<CR>"
     endif
 
+    let s:isStarSearch = 0
     let s:quickSearchPattern = strpart(getcmdline(), 0, strlen(getcmdline()) - s:NoHistoryMarkerLen)
     " Note: Must use CTRL-C to abort search command-line; <Esc> somehow doesn't
     " work. 
-    return "\<C-c>:call SearchAsQuickJump#JumpAfterSearch(" . l:isBackward . ")\<CR>"
+    return "\<C-c>:call SearchAsQuickJump#JumpAfterSearchCommand(" . l:isBackward . ")\<CR>"
 endfunction
 
 
