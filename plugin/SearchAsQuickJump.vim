@@ -98,6 +98,12 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	005	17-Jul-2009	Adapted to changed interface of
+"				SearchSpecial#SearchWithout: Passing in
+"				l:cwordStartPosition in a dictionary. 
+"				Now defaulting to empty list instead of [0, 0]
+"				for no currentMatchPosition; it's slightly more
+"				efficient. 
 "	004	14-Jul-2009	Now handling optional [count] with the aid of
 "				the SearchRepeat plugin. 
 "				The "Star" and "Hash" mappings do not use the
@@ -139,7 +145,7 @@ function! s:DoSearch( count, isBackward, ... )
 	let l:save_smartcase = &smartcase
 	set nosmartcase
     endif
-    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, (a:0 ? a:1 : [0, 0]))
+    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'currentMatchPosition': (a:0 ? a:1 : [])})
     if s:isStarSearch
 	let &smartcase = l:save_smartcase
     endif
@@ -150,7 +156,7 @@ nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call <SID>DoSearch(v:count1,
 
 "- functions ------------------------------------------------------------------
 function! s:SearchAndSetRepeat( count, isBackward, ... )
-    call s:DoSearch(a:count, a:isBackward, (a:0 ? a:1 : [0, 0]))
+    call s:DoSearch(a:count, a:isBackward, (a:0 ? a:1 : []))
     if a:isBackward
 	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})
     else
@@ -163,11 +169,11 @@ function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPo
     call s:SearchAndSetRepeat(a:count, a:isBackward, a:cwordStartPosition)
 endfunction
 function! s:SearchCWord( isWholeWordSearch, isBackward )
-    let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [0, 0])
+    let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [])
     call s:SearchText(expand('<cword>'), v:count1, a:isWholeWordSearch, a:isBackward, l:cwordStartPosition)
 endfunction
 function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
-    call s:SearchText(a:text, a:count, a:isWholeWordSearch, a:isBackward, [0, 0])
+    call s:SearchText(a:text, a:count, a:isWholeWordSearch, a:isBackward, [])
 endfunction
 function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
     call histdel('/', -1)
