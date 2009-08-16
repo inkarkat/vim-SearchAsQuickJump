@@ -104,6 +104,9 @@
 "				Now defaulting to empty list instead of [0, 0]
 "				for no currentMatchPosition; it's slightly more
 "				efficient. 
+"				The SearchSpecial#SearchWithout() function now
+"				supports the 'isStarSearch' option, so removed
+"				temporary disabling of 'smartcase' here. 
 "	004	14-Jul-2009	Now handling optional [count] with the aid of
 "				the SearchRepeat plugin. 
 "				The "Star" and "Hash" mappings do not use the
@@ -137,18 +140,7 @@ let g:loaded_SearchAsQuickJump = 1
 
 "- use of SearchSpecial library -----------------------------------------------
 function! s:DoSearch( count, isBackward, ... )
-    if s:isStarSearch
-	" The search function uses the 'ignorecase' and 'smartcase' settings.
-	" For this clone of the '*' command, the 'smartcase' setting doesn't make
-	" sense: A jump to an all-lowercase <cword> would suddenly change all future
-	" matches to lowercase, too. 
-	let l:save_smartcase = &smartcase
-	set nosmartcase
-    endif
-    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'currentMatchPosition': (a:0 ? a:1 : [])})
-    if s:isStarSearch
-	let &smartcase = l:save_smartcase
-    endif
+    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
 endfunction
 nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call <SID>DoSearch(v:count1, 0)<CR>
 nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call <SID>DoSearch(v:count1, 1)<CR>
