@@ -98,6 +98,7 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	006	17-Aug-2009	Added a:description to SearchRepeat#Register(). 
 "	005	17-Jul-2009	Adapted to changed interface of
 "				SearchSpecial#SearchWithout: Passing in
 "				l:cwordStartPosition in a dictionary. 
@@ -253,8 +254,8 @@ nmap <silent> goQ <Plug>SearchAsQuickJumpPrev
 
 " Integration into SearchRepeat.vim
 try
-    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpNext", '/<S-CR>', 'gnq', 'Quick search forward', '')
-    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpPrev", '?<S-CR>', 'gnQ', 'Quick search backward', '')
+    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpNext", '/<S-CR>', 'gnq', '/quick/', 'Quick search forward', '')
+    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpPrev", '?<S-CR>', 'gnQ', '?quick?', 'Quick search backward', '')
     nnoremap <silent> gnq :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})<CR>
     nnoremap <silent> gnQ :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})<CR>
 catch /^Vim\%((\a\+)\)\=:E117/	" catch error E117: Unknown function
