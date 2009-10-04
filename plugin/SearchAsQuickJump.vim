@@ -24,7 +24,7 @@
 "
 "   How can this be reconciled? This plugin sets up alternative mappings to the
 "   <CR> key which normally concludes entering of the search pattern in
-"   command-line mode. By pressing <S-CR>, a quick search is triggered instead
+"   command-line mode. By pressing <C-CR>, a quick search is triggered instead
 "   of a normal one. This quick search does not use search highlighting and the
 "   search pattern is not added to the search history, so it can be used without
 "   affecting the normal search. 
@@ -34,8 +34,8 @@
 "   |N| commands. 
 "
 " USAGE:
-" /{pattern}[/]<S-CR>	When a search via |/| or |?| is sent off by pressing
-" ?{pattern}[?]<S-CR>	<S-CR>, a quick forward / backward search is performed.
+" /{pattern}[/]<C-CR>	When a search via |/| or |?| is sent off by pressing
+" ?{pattern}[?]<C-CR>	<C-CR>, a quick forward / backward search is performed.
 "			Matches will not be highlighted via 'hlsearch', and the
 "			search pattern will not be added to the search history. 
 "			Use this for a quick search without the formality and
@@ -98,6 +98,11 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	007	10-Sep-2009	Replaced <S-CR> with <C-CR>, which is slightly
+"				easier to reach when Ctrl is mapped to the Caps
+"				Lock key. 
+"				BUG: Must remove history marker when not in a
+"				search. 
 "	006	17-Aug-2009	Added a:description to SearchRepeat#Register(). 
 "	005	17-Jul-2009	Adapted to changed interface of
 "				SearchSpecial#SearchWithout: Passing in
@@ -185,7 +190,9 @@ function! s:QuickSearch()
     elseif getcmdtype() ==# '?'
 	let l:isBackward = 1
     else
-	return "\<CR>"
+	" This is no search, remove the history marker and conclude the command
+	" line with a normal Enter. 
+	return repeat("\<BS>", s:NoHistoryMarkerLen) . "\<CR>"
     endif
 
     let s:isStarSearch = 0
@@ -220,7 +227,7 @@ cnoremap <expr> <SID>QuickSearch <SID>QuickSearch()
 " more. The only way to work around this is by using :cmap and prepending a
 " <Space> (which is considered part of the NoHistoryMarker and later removed
 " with it).  
-cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
+cmap <silent> <C-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
 
 nnoremap <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)<CR>
@@ -254,8 +261,8 @@ nmap <silent> goQ <Plug>SearchAsQuickJumpPrev
 
 " Integration into SearchRepeat.vim
 try
-    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpNext", '/<S-CR>', 'gnq', '/quick/', 'Quick search forward', '')
-    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpPrev", '?<S-CR>', 'gnQ', '?quick?', 'Quick search backward', '')
+    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpNext", '/<C-CR>', 'gnq', '/quick/', 'Quick search forward', '')
+    call SearchRepeat#Register("\<Plug>SearchAsQuickJumpPrev", '?<C-CR>', 'gnQ', '?quick?', 'Quick search backward', '')
     nnoremap <silent> gnq :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})<CR>
     nnoremap <silent> gnQ :<C-U>call SearchRepeat#Execute("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})<CR>
 catch /^Vim\%((\a\+)\)\=:E117/	" catch error E117: Unknown function
