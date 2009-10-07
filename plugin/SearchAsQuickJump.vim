@@ -98,6 +98,9 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	009	06-Oct-2009	Do not define q* and q# mappings for select
+"				mode; printable characters should start insert
+"				mode. 
 "	008	05-Oct-2009	UNDO: Replaced <C-CR> with <S-CR>. 
 "	007	10-Sep-2009	Replaced <S-CR> with <C-CR>, which is slightly
 "				easier to reach when Ctrl is mapped to the Caps
@@ -249,11 +252,11 @@ endif
 if ! hasmapto('<Plug>SearchAsQuickJumpGHash', 'n')
     nmap <silent> gq# <Plug>SearchAsQuickJumpGHash
 endif
-if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'v')
-    vmap <silent> q* <Plug>SearchAsQuickJumpStar
+if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'x')
+    xmap <silent> q* <Plug>SearchAsQuickJumpStar
 endif
-if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'v')
-    vmap <silent> q# <Plug>SearchAsQuickJumpHash
+if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'x')
+    xmap <silent> q# <Plug>SearchAsQuickJumpHash
 endif
 
 nmap <silent> goq <Plug>SearchAsQuickJumpNext
