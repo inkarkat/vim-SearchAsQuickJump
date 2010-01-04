@@ -46,6 +46,10 @@
 "			[count]'th occurrence is supported and the 'n/N' keys
 "			are reprogrammed to repeat the quick search. 
 "
+" [count]goq / goQ	Search forward / backward to the [count]'th occurrence
+"			of the quick search pattern. 
+"
+" The following commands are optional; cp. the Configuration section below. 
 " q*, q#		Search forward / backward for the [count]'th occurrence
 "			of the word nearest to the cursor.
 " gq*, gq#		Like above, but don't put "\<" and "\>" around the word.
@@ -61,9 +65,6 @@
 "
 "			If the SearchRepeat plugin is installed, the 'n/N' keys
 "			are reprogrammed to repeat the quick search. 
-"
-" [count]goq / goQ	Search forward / backward to the [count]'th occurrence
-"			of the quick search pattern. 
 "
 "   If the SearchRepeat plugin is installed, a parallel set of "go now and for
 "   next searches" mappings (starting with 'gn...' instead of 'go...') is
@@ -83,6 +84,10 @@
 "   - SearchRepeat.vim autoload script (optional integration). 
 
 " CONFIGURATION:
+"   If you want commands like the built-in '*', 'g*', '#' and 'g#' commands (but
+"   prefixed with 'q'), use: 
+"	:let g:SearchAsQuickJump_DefineStarCommands = 1
+"
 " INTEGRATION:
 " LIMITATIONS:
 " ASSUMPTIONS:
@@ -98,6 +103,10 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	010	08-Oct-2009	Make definition of star commands optional via
+"				g:SearchAsQuickJump_DefineStarCommands; I do not
+"				use them, and the default 'q' prefix clashes
+"				with many buffer-local "quit" mappings. 
 "	009	06-Oct-2009	Do not define q* and q# mappings for select
 "				mode; printable characters should start insert
 "				mode. 
@@ -148,6 +157,12 @@ if exists('g:loaded_SearchAsQuickJump') || (v:version < 700)
 endif
 let g:loaded_SearchAsQuickJump = 1
 
+"- configuration --------------------------------------------------------------
+if ! exists('g:SearchAsQuickJump_DefineStarCommands')
+    let g:SearchAsQuickJump_DefineStarCommands = 0
+endif
+
+
 "- use of SearchSpecial library -----------------------------------------------
 function! s:DoSearch( count, isBackward, ... )
     call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
@@ -178,7 +193,7 @@ function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
     call s:SearchText(a:text, a:count, a:isWholeWordSearch, a:isBackward, [])
 endfunction
 function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
-    call histdel('/', -1)
+    call histdel('search', -1)
 
     " If the SearchRepeat plugin is installed, it provides the [count] given to
     " the last search command for other consumers. Otherwise, we do not support
@@ -234,6 +249,7 @@ cnoremap <expr> <SID>QuickSearch <SID>QuickSearch()
 cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
 
+if g:SearchAsQuickJump_DefineStarCommands
 nnoremap <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)<CR>
 nnoremap <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchCWord(1, 1)<CR>
 nnoremap <Plug>SearchAsQuickJumpGStar :<C-u>call <SID>SearchCWord(0, 0)<CR>
@@ -257,6 +273,7 @@ if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'x')
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'x')
     xmap <silent> q# <Plug>SearchAsQuickJumpHash
+endif
 endif
 
 nmap <silent> goq <Plug>SearchAsQuickJumpNext
