@@ -78,7 +78,7 @@
 
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher. 
-"   - SearchHighlighting.vim autoload script. 
+"   - ingosearch.vim autoload script. 
 "   - SearchSpecial.vim autoload script. 
 "   - SearchSpecialCWord.vim autoload script. 
 "   - SearchRepeat.vim autoload script (optional integration). 
@@ -103,6 +103,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	011	05-Jan-2010	Moved SearchHighlighting#GetSearchPattern() into
+"				separate ingosearch.vim utility module. 
 "	010	08-Oct-2009	Make definition of star commands optional via
 "				g:SearchAsQuickJump_DefineStarCommands; I do not
 "				use them, and the default 'q' prefix clashes
@@ -182,7 +184,7 @@ function! s:SearchAndSetRepeat( count, isBackward, ... )
 endfunction
 function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
     let s:isStarSearch = 1
-    let s:quickSearchPattern = SearchHighlighting#GetSearchPattern(a:text, a:isWholeWordSearch, '')
+    let s:quickSearchPattern = ingosearch#GetSearchPattern(a:text, a:isWholeWordSearch, '')
     call s:SearchAndSetRepeat(a:count, a:isBackward, a:cwordStartPosition)
 endfunction
 function! s:SearchCWord( isWholeWordSearch, isBackward )
