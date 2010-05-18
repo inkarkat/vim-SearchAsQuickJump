@@ -17,10 +17,10 @@
 "   rubbish, the highlighting should not continue to distract after the search;
 "   it should be off (but 'incsearch' helps to recognize when enough of the
 "   pattern is typed to reach the desired location). Likewise, the search
-"   pattern is useless in the search history, as I am unlikely to repeat that
-"   search.
-"   On the other hand, for actual searches, both history recall and highlighting
-"   of matches are vital and central to the task. 
+"   pattern is useless in the search history and as the last pattern for the |n|
+"   command, as I am unlikely to repeat that search.
+"   On the other hand, for actual searches, history recall, repeated search and
+"   highlighting of matches are vital and central to the task. 
 "
 "   How can this be reconciled? This plugin sets up alternative mappings to the
 "   <CR> key which normally concludes entering of the search pattern in
@@ -29,25 +29,26 @@
 "   search pattern is not added to the search history, so it can be used without
 "   affecting the normal search. 
 "   
-"   Next / previous matches can be jumped to via separate mappings, or (if the
-"   integration with the SearchRepeat plugin is used) also via the default |n| /
-"   |N| commands. 
+"   Next / previous matches can be jumped to via separate mappings, but not via
+"   the default |n| / |N| commands. (Even if the integration with the
+"   SearchRepeat plugin is used; contrary to most other integrations, this quick
+"   search must be explicitly activated via the |gnq| / |gnQ| mapping. )
 "
 " USAGE:
 " /{pattern}[/]<S-CR>	When a search via |/| or |?| is sent off by pressing
 " ?{pattern}[?]<S-CR>	<S-CR>, a quick forward / backward search is performed.
 "			Matches will not be highlighted via 'hlsearch', and the
-"			search pattern will not be added to the search history. 
+"			search pattern will not be added to the search history
+"			or used as the last pattern for |n| / |N| search
+"			repeats. 
 "			Use this for a quick search without the formality and
 "			persistence of a normal search, which can still be
-"			obtained by pressing <CR> at the end. 
-"
-"			If the SearchRepeat plugin is installed, a jump to the
-"			[count]'th occurrence is supported and the 'n/N' keys
-"			are reprogrammed to repeat the quick search. 
+"			obtained by concluding the pattern input with the
+"			default <CR> at the end. 
 "
 " [count]goq / goQ	Search forward / backward to the [count]'th occurrence
-"			of the quick search pattern. 
+"			of the quick search pattern. This is the equivalent to
+"			the default |n| / |N| search repeat commands. 
 "
 " The following commands are optional; cp. the Configuration section below. 
 " q*, q#		Search forward / backward for the [count]'th occurrence
@@ -62,9 +63,6 @@
 "			These mappings are based on the built-in |star| and |#|
 "			commands. Like with them, 'ignorecase' is used,
 "			'smartcase' is not. 
-"
-"			If the SearchRepeat plugin is installed, the 'n/N' keys
-"			are reprogrammed to repeat the quick search. 
 "
 "   If the SearchRepeat plugin is installed, a parallel set of "go now and for
 "   next searches" mappings (starting with 'gn...' instead of 'go...') is
@@ -90,6 +88,9 @@
 "
 " INTEGRATION:
 " LIMITATIONS:
+"   - Doesn't work with operator-pending searches (e.g. d/foo<S-CR>); the
+"     operator is canceled. 
+"
 " ASSUMPTIONS:
 " KNOWN PROBLEMS:
 " TODO:
@@ -103,6 +104,12 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	012	19-May-2010	Do not activate the quick search for |n| / |N|
+"				commands (if the SearchRepeat plugin is
+"				installed). It is typically not desired to
+"				modify the last pattern by quick searches, and
+"				one can explicitly repeat a quick search via the
+"				|goq| / |goQ| mappings, anyway. 
 "	011	05-Jan-2010	Moved SearchHighlighting#GetSearchPattern() into
 "				separate ingosearch.vim utility module and
 "				renamed to
@@ -176,18 +183,10 @@ nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call <SID>DoSearch(v:count1,
 
 
 "- functions ------------------------------------------------------------------
-function! s:SearchAndSetRepeat( count, isBackward, ... )
-    call s:DoSearch(a:count, a:isBackward, (a:0 ? a:1 : []))
-    if a:isBackward
-	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpPrev", "\<Plug>SearchAsQuickJumpNext", 2, {'hlsearch': 0})
-    else
-	silent! call SearchRepeat#Set("\<Plug>SearchAsQuickJumpNext", "\<Plug>SearchAsQuickJumpPrev", 2, {'hlsearch': 0})
-    endif
-endfunction
 function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
     let s:isStarSearch = 1
     let s:quickSearchPattern = ingosearch#LiteralTextToSearchPattern(a:text, a:isWholeWordSearch, '')
-    call s:SearchAndSetRepeat(a:count, a:isBackward, a:cwordStartPosition)
+    call s:DoSearch(a:count, a:isBackward, a:cwordStartPosition)
 endfunction
 function! s:SearchCWord( isWholeWordSearch, isBackward )
     let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [])
@@ -205,7 +204,7 @@ function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
     " the [count]. 
     let l:count = ((exists('g:lastSearchCount') && g:lastSearchCount) ? g:lastSearchCount : 1)
 
-    call s:SearchAndSetRepeat(l:count, a:isBackward)
+    call s:DoSearch(l:count, a:isBackward)
 endfunction
 function! s:QuickSearch()
     if getcmdtype() ==# '/'
