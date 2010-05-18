@@ -88,9 +88,6 @@
 "
 " INTEGRATION:
 " LIMITATIONS:
-"   - Doesn't work with operator-pending searches (e.g. d/foo<S-CR>); the
-"     operator is canceled. 
-"
 " ASSUMPTIONS:
 " KNOWN PROBLEMS:
 " TODO:
@@ -104,6 +101,9 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	013	19-May-2010	Now also works with operator-pending searches
+"				(e.g. d/foo<S-CR>) by hooking into ":omap /" and
+"				adding a special case for it. 
 "	012	19-May-2010	Do not activate the quick search for |n| / |N|
 "				commands (if the SearchRepeat plugin is
 "				installed). It is typically not desired to
@@ -183,6 +183,12 @@ nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call <SID>DoSearch(v:count1,
 
 
 "- functions ------------------------------------------------------------------
+let s:isOperatorPendingSearch = 0
+function! s:OperatorPendingSearch( searchOperator )
+    let s:isOperatorPendingSearch = 1
+    return a:searchOperator
+endfunction
+
 function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
     let s:isStarSearch = 1
     let s:quickSearchPattern = ingosearch#LiteralTextToSearchPattern(a:text, a:isWholeWordSearch, '')
@@ -219,9 +225,24 @@ function! s:QuickSearch()
 
     let s:isStarSearch = 0
     let s:quickSearchPattern = strpart(getcmdline(), 0, strlen(getcmdline()) - s:NoHistoryMarkerLen)
-    " Note: Must use CTRL-C to abort search command-line; <Esc> somehow doesn't
-    " work. 
-    return "\<C-c>:call SearchAsQuickJump#JumpAfterSearchCommand(" . l:isBackward . ")\<CR>"
+
+    if s:isOperatorPendingSearch
+	let s:isOperatorPendingSearch = 0
+	" If this search is part of an operator (e.g. "d/foo<S-CR>"), we have to
+	" execute the search, so that the operator applies; canceling and
+	" jumping to the match won't do. (Canceling and re-executing via 
+	" :execute v:operator . '/' . s:quickSearchPattern . "\<CR>" will still
+	" clobber the search history, we would have to write our own motion or
+	" at least come up with a visual selection up to the match.) 
+	" Fortunately, we don't have to worry about what happens after the
+	" operator, and can happily append commands to remove the search pattern
+	" from the history. 
+	return repeat("\<BS>", s:NoHistoryMarkerLen) . "\<CR>:call histdel('search', -1)|let @/ = histget('search', -1)\<CR>"
+    else
+	" Note: Must use CTRL-C to abort search command-line; <Esc> somehow doesn't
+	" work. 
+	return "\<C-c>:call SearchAsQuickJump#JumpAfterSearchCommand(" . l:isBackward . ")\<CR>"
+    endif
 endfunction
 
 
@@ -278,6 +299,9 @@ if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'x')
     xmap <silent> q# <Plug>SearchAsQuickJumpHash
 endif
 endif
+
+onoremap <expr> / <SID>OperatorPendingSearch('/')
+onoremap <expr> ? <SID>OperatorPendingSearch('?')
 
 nmap <silent> goq <Plug>SearchAsQuickJumpNext
 nmap <silent> goQ <Plug>SearchAsQuickJumpPrev
