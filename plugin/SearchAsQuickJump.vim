@@ -95,7 +95,7 @@
 " - Warning if {offset} is specified. 
 " - Handle {offset}. 
 "
-" Copyright: (C) 2009 by Ingo Karkat
+" Copyright: (C) 2009-2010 by Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'. 
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -185,7 +185,23 @@ nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call <SID>DoSearch(v:count1,
 "- functions ------------------------------------------------------------------
 let s:isOperatorPendingSearch = 0
 function! s:OperatorPendingSearch( searchOperator )
+    " We set a simple flag to indicate to s:QuickSearch() that an operator is
+    " pending for the current search. 
     let s:isOperatorPendingSearch = 1
+
+    " If an operator-pending search is canceled or concluded with the default
+    " <CR>, s:QuickSearch cannot clear the flag. We would need to hook into
+    " <Esc>, <CR>, etc. in command-line mode to be notified of this. Instead, we
+    " set up a temporary, one-shot autocmd to clear the flag on the next
+    " occasion. Mostly, this should be the CursorMoved event, which fortunately
+    " isn't fired when 'incsearch' highlights the potential match, only when the
+    " operator results in a cursor move. The other events are only there to be
+    " safe. 
+    augroup OperatorPendingSearchOff
+	autocmd!
+	autocmd BufLeave,WinLeave,InsertEnter,CursorHold,CursorMoved * let s:isOperatorPendingSearch = 0 | autocmd! OperatorPendingSearchOff
+    augroup END
+
     return a:searchOperator
 endfunction
 
@@ -237,6 +253,7 @@ function! s:QuickSearch()
 	" Fortunately, we don't have to worry about what happens after the
 	" operator, and can happily append commands to remove the search pattern
 	" from the history. 
+"****D echomsg '**** operator at' string(getpos('.'))
 	return repeat("\<BS>", s:NoHistoryMarkerLen) . "\<CR>:call histdel('search', -1)|let @/ = histget('search', -1)\<CR>"
     else
 	" Note: Must use CTRL-C to abort search command-line; <Esc> somehow doesn't
