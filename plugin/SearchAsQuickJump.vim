@@ -103,6 +103,8 @@
 " REVISION	DATE		REMARKS 
 "	014	17-May-2011	Also save and restore regtype of the unnamed
 "				register in mappings. 
+"				Also avoid clobbering the selection and
+"				clipboard registers.
 "	013	19-May-2010	Now also works with operator-pending searches
 "				(e.g. d/foo<S-CR>) by hooking into ":omap /" and
 "				adding a special case for it. 
@@ -297,8 +299,8 @@ nnoremap <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)<CR>
 nnoremap <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchCWord(1, 1)<CR>
 nnoremap <Plug>SearchAsQuickJumpGStar :<C-u>call <SID>SearchCWord(0, 0)<CR>
 nnoremap <Plug>SearchAsQuickJumpGHash :<C-u>call <SID>SearchCWord(0, 1)<CR>
-vnoremap <Plug>SearchAsQuickJumpStar  :<C-u>let save_reg=getreg('"')<Bar>let save_regtype=getregtype('"')<Bar>let save_count=v:count1<CR>gvy:<C-u>call <SID>SearchSelection(@", save_count, 0, 0)<Bar>call setreg('"', save_reg, save_regtype)<Bar>unlet save_reg<Bar>unlet save_regtype<Bar>unlet save_count<CR>
-vnoremap <Plug>SearchAsQuickJumpHash  :<C-u>let save_reg=getreg('"')<Bar>let save_regtype=getregtype('"')<Bar>let save_count=v:count1<CR>gvy:<C-u>call <SID>SearchSelection(@", save_count, 0, 1)<Bar>call setreg('"', save_reg, save_regtype)<Bar>unlet save_reg<Bar>unlet save_regtype<Bar>unlet save_count<CR>
+vnoremap <Plug>SearchAsQuickJumpStar  :<C-u>let save_cb=&cb<Bar>let save_reg=getreg('"')<Bar>let save_regtype=getregtype('"')<Bar>let save_count=v:count1<CR>gvy:<C-u>call <SID>SearchSelection(@", save_count, 0, 0)<Bar>call setreg('"', save_reg, save_regtype)<Bar>let &cb=save_cb<Bar>unlet save_cb<Bar>unlet save_reg<Bar>unlet save_regtype<Bar>unlet save_count<CR>
+vnoremap <Plug>SearchAsQuickJumpHash  :<C-u>let save_cb=&cb<Bar>let save_reg=getreg('"')<Bar>let save_regtype=getregtype('"')<Bar>let save_count=v:count1<CR>gvy:<C-u>call <SID>SearchSelection(@", save_count, 0, 1)<Bar>call setreg('"', save_reg, save_regtype)<Bar>let &cb=save_cb<Bar>unlet save_cb<Bar>unlet save_reg<Bar>unlet save_regtype<Bar>unlet save_count<CR>
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'n')
     nmap <silent> q* <Plug>SearchAsQuickJumpStar
 endif
