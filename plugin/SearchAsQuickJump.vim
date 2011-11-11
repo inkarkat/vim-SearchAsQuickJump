@@ -102,6 +102,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	016	30-Sep-2011	Use <silent> for <Plug> mapping instead of
+"				default mapping. 
 "	015	12-Sep-2011	Use ingointegration#GetVisualSelection() instead
 "				of inline capture. 
 "	014	17-May-2011	Also save and restore regtype of the unnamed
@@ -298,29 +300,29 @@ cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
 
 if g:SearchAsQuickJump_DefineStarCommands
-nnoremap <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)<CR>
-nnoremap <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchCWord(1, 1)<CR>
-nnoremap <Plug>SearchAsQuickJumpGStar :<C-u>call <SID>SearchCWord(0, 0)<CR>
-nnoremap <Plug>SearchAsQuickJumpGHash :<C-u>call <SID>SearchCWord(0, 1)<CR>
-vnoremap <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchSelection(ingointegration#GetVisualSelection(), v:count1, 0, 0)<CR>
-vnoremap <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchSelection(ingointegration#GetVisualSelection(), v:count1, 0, 1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchCWord(1, 1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpGStar :<C-u>call <SID>SearchCWord(0, 0)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpGHash :<C-u>call <SID>SearchCWord(0, 1)<CR>
+vnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchSelection(ingointegration#GetVisualSelection(), v:count1, 0, 0)<CR>
+vnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchSelection(ingointegration#GetVisualSelection(), v:count1, 0, 1)<CR>
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'n')
-    nmap <silent> q* <Plug>SearchAsQuickJumpStar
+    nmap q* <Plug>SearchAsQuickJumpStar
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'n')
-    nmap <silent> q# <Plug>SearchAsQuickJumpHash
+    nmap q# <Plug>SearchAsQuickJumpHash
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpGStar', 'n')
-    nmap <silent> gq* <Plug>SearchAsQuickJumpGStar
+    nmap gq* <Plug>SearchAsQuickJumpGStar
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpGHash', 'n')
-    nmap <silent> gq# <Plug>SearchAsQuickJumpGHash
+    nmap gq# <Plug>SearchAsQuickJumpGHash
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'x')
-    xmap <silent> q* <Plug>SearchAsQuickJumpStar
+    xmap q* <Plug>SearchAsQuickJumpStar
 endif
 if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'x')
-    xmap <silent> q# <Plug>SearchAsQuickJumpHash
+    xmap q# <Plug>SearchAsQuickJumpHash
 endif
 endif
 
