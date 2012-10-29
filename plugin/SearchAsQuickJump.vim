@@ -342,4 +342,4 @@ try
 catch /^Vim\%((\a\+)\)\=:E117/	" catch error E117: Unknown function
 endtry
 
-" vim: set sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
+" vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
