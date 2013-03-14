@@ -110,6 +110,7 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES				      *SearchAsQuickJump-dependencies*
 
 - Requires Vim 7.0 or higher.
+- SearchRepeat.vim (vimscript #0000) plugin (optional)
 
 ==============================================================================
 CONFIGURATION				     *SearchAsQuickJump-configuration*
