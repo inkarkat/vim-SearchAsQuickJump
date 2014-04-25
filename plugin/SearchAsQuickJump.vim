@@ -2,18 +2,21 @@
 "
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
-"   - ingointegration.vim autoload script
-"   - ingosearch.vim autoload script
+"   - ingo/regexp.vim autoload script
+"   - ingo/selection.vim autoload script
 "   - SearchSpecial.vim autoload script
 "   - SearchSpecialCWord.vim autoload script
 "   - SearchRepeat.vim autoload script (optional integration)
 
-" Copyright: (C) 2009-2012 Ingo Karkat
+" Copyright: (C) 2009-2013 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"	018	24-May-2013	Move ingosearch.vim to ingo-library.
+"	017	24-May-2013	Move ingointegration#GetVisualSelection() into
+"				ingo-library.
 "	016	30-Sep-2011	Use <silent> for <Plug> mapping instead of
 "				default mapping.
 "	015	12-Sep-2011	Use ingointegration#GetVisualSelection() instead
@@ -131,7 +134,7 @@ endfunction
 
 function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
     let s:isStarSearch = 1
-    let s:quickSearchPattern = ingosearch#LiteralTextToSearchPattern(a:text, a:isWholeWordSearch, '')
+    let s:quickSearchPattern = ingo#regexp#FromLiteralText(a:text, a:isWholeWordSearch, '')
     call s:DoSearch(a:count, a:isBackward, a:cwordStartPosition)
 endfunction
 function! s:SearchCWord( isWholeWordSearch, isBackward )
@@ -220,8 +223,8 @@ nnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)
 nnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchCWord(1, 1)<CR>
 nnoremap <silent> <Plug>SearchAsQuickJumpGStar :<C-u>call <SID>SearchCWord(0, 0)<CR>
 nnoremap <silent> <Plug>SearchAsQuickJumpGHash :<C-u>call <SID>SearchCWord(0, 1)<CR>
-vnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchSelection(ingointegration#GetVisualSelection(), v:count1, 0, 0)<CR>
-vnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchSelection(ingointegration#GetVisualSelection(), v:count1, 0, 1)<CR>
+vnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 0)<CR>
+vnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 1)<CR>
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'n')
     nmap q* <Plug>SearchAsQuickJumpStar
 endif
