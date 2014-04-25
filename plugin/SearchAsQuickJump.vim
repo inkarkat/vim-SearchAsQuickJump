@@ -8,7 +8,7 @@
 "   - SearchSpecialCWord.vim autoload script
 "   - SearchRepeat.vim autoload script (optional integration)
 
-" Copyright: (C) 2009-2013 Ingo Karkat
+" Copyright: (C) 2009-2014 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -102,10 +102,10 @@ endif
 "- use of SearchSpecial library -----------------------------------------------
 
 function! s:DoSearch( count, isBackward, ... )
-    call SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
+    return SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
 endfunction
-nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>call <SID>DoSearch(v:count1, 0)<CR>
-nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>call <SID>DoSearch(v:count1, 1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>if ! <SID>DoSearch(v:count1, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
+nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>if ! <SID>DoSearch(v:count1, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
 
 
 "- functions ------------------------------------------------------------------
@@ -135,14 +135,14 @@ endfunction
 function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
     let s:isStarSearch = 1
     let s:quickSearchPattern = ingo#regexp#FromLiteralText(a:text, a:isWholeWordSearch, '')
-    call s:DoSearch(a:count, a:isBackward, a:cwordStartPosition)
+    return s:DoSearch(a:count, a:isBackward, a:cwordStartPosition)
 endfunction
 function! s:SearchCWord( isWholeWordSearch, isBackward )
     let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [])
-    call s:SearchText(expand('<cword>'), v:count1, a:isWholeWordSearch, a:isBackward, l:cwordStartPosition)
+    return s:SearchText(expand('<cword>'), v:count1, a:isWholeWordSearch, a:isBackward, l:cwordStartPosition)
 endfunction
 function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
-    call s:SearchText(a:text, a:count, a:isWholeWordSearch, a:isBackward, [])
+    return s:SearchText(a:text, a:count, a:isWholeWordSearch, a:isBackward, [])
 endfunction
 function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
     call histdel('search', -1)
@@ -153,7 +153,7 @@ function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
     " the [count].
     let l:count = ((exists('g:lastSearchCount') && g:lastSearchCount) ? g:lastSearchCount : 1)
 
-    call s:DoSearch(l:count, a:isBackward)
+    return s:DoSearch(l:count, a:isBackward)
 endfunction
 function! s:QuickSearch()
     if getcmdtype() ==# '/'
@@ -185,7 +185,7 @@ function! s:QuickSearch()
     else
 	" Note: Must use CTRL-C to abort search command-line; <Esc> somehow doesn't
 	" work.
-	return "\<C-c>:call SearchAsQuickJump#JumpAfterSearchCommand(" . l:isBackward . ")\<CR>"
+	return "\<C-c>:if ! SearchAsQuickJump#JumpAfterSearchCommand(" . l:isBackward . ") | echoerr ingo#err#Get() | endif\<CR>"
     endif
 endfunction
 
@@ -219,12 +219,12 @@ cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
 
 if g:SearchAsQuickJump_DefineStarCommands
-nnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchCWord(1, 0)<CR>
-nnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchCWord(1, 1)<CR>
-nnoremap <silent> <Plug>SearchAsQuickJumpGStar :<C-u>call <SID>SearchCWord(0, 0)<CR>
-nnoremap <silent> <Plug>SearchAsQuickJumpGHash :<C-u>call <SID>SearchCWord(0, 1)<CR>
-vnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>call <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 0)<CR>
-vnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>call <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 1)<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>if ! <SID>SearchCWord(1, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
+nnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>if ! <SID>SearchCWord(1, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
+nnoremap <silent> <Plug>SearchAsQuickJumpGStar :<C-u>if ! <SID>SearchCWord(0, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
+nnoremap <silent> <Plug>SearchAsQuickJumpGHash :<C-u>if ! <SID>SearchCWord(0, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
+vnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>if ! <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
+vnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>if ! <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'n')
     nmap q* <Plug>SearchAsQuickJumpStar
 endif
