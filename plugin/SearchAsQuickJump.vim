@@ -2,10 +2,9 @@
 "
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
-"   - ingo/regexp.vim autoload script
+"   - SearchAsQuickJump.vim autoload script
+"   - ingo/err.vim autoload script
 "   - ingo/selection.vim autoload script
-"   - SearchSpecial.vim autoload script
-"   - SearchSpecialCWord.vim autoload script
 "   - SearchRepeat.vim autoload script (optional integration)
 
 " Copyright: (C) 2009-2014 Ingo Karkat
@@ -14,6 +13,11 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"	020	28-Apr-2014	FIX: Need to expose s:OperatorPendingSearch().
+"				FIX: Need to move s:NoHistoryMarkerLen.
+"	019	26-Apr-2014	Split off autoload script.
+"				Abort on error, as per the changed SearchSpecial
+"				interface.
 "	018	24-May-2013	Move ingosearch.vim to ingo-library.
 "	017	24-May-2013	Move ingointegration#GetVisualSelection() into
 "				ingo-library.
@@ -99,98 +103,10 @@ if ! exists('g:SearchAsQuickJump_DefineStarCommands')
 endif
 
 
-"- use of SearchSpecial library -----------------------------------------------
-
-function! s:DoSearch( count, isBackward, ... )
-    return SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
-endfunction
-nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>if ! <SID>DoSearch(v:count1, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
-nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>if ! <SID>DoSearch(v:count1, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
-
-
-"- functions ------------------------------------------------------------------
-
-let s:isOperatorPendingSearch = 0
-function! s:OperatorPendingSearch( searchOperator )
-    " We set a simple flag to indicate to s:QuickSearch() that an operator is
-    " pending for the current search.
-    let s:isOperatorPendingSearch = 1
-
-    " If an operator-pending search is canceled or concluded with the default
-    " <CR>, s:QuickSearch cannot clear the flag. We would need to hook into
-    " <Esc>, <CR>, etc. in command-line mode to be notified of this. Instead, we
-    " set up a temporary, one-shot autocmd to clear the flag on the next
-    " occasion. Mostly, this should be the CursorMoved event, which fortunately
-    " isn't fired when 'incsearch' highlights the potential match, only when the
-    " operator results in a cursor move. The other events are only there to be
-    " safe.
-    augroup OperatorPendingSearchOff
-	autocmd!
-	autocmd BufLeave,WinLeave,InsertEnter,CursorHold,CursorMoved * let s:isOperatorPendingSearch = 0 | autocmd! OperatorPendingSearchOff
-    augroup END
-
-    return a:searchOperator
-endfunction
-
-function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
-    let s:isStarSearch = 1
-    let s:quickSearchPattern = ingo#regexp#FromLiteralText(a:text, a:isWholeWordSearch, '')
-    return s:DoSearch(a:count, a:isBackward, a:cwordStartPosition)
-endfunction
-function! s:SearchCWord( isWholeWordSearch, isBackward )
-    let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [])
-    return s:SearchText(expand('<cword>'), v:count1, a:isWholeWordSearch, a:isBackward, l:cwordStartPosition)
-endfunction
-function! s:SearchSelection( text, count, isWholeWordSearch, isBackward )
-    return s:SearchText(a:text, a:count, a:isWholeWordSearch, a:isBackward, [])
-endfunction
-function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
-    call histdel('search', -1)
-
-    " If the SearchRepeat plugin is installed, it provides the [count] given to
-    " the last search command for other consumers. Otherwise, we do not support
-    " [count], as that would mean remapping the / and ? commands just to record
-    " the [count].
-    let l:count = ((exists('g:lastSearchCount') && g:lastSearchCount) ? g:lastSearchCount : 1)
-
-    return s:DoSearch(l:count, a:isBackward)
-endfunction
-function! s:QuickSearch()
-    if getcmdtype() ==# '/'
-	let l:isBackward = 0
-    elseif getcmdtype() ==# '?'
-	let l:isBackward = 1
-    else
-	" This is no search, remove the history marker and conclude the command
-	" line with a normal Enter.
-	return repeat("\<BS>", s:NoHistoryMarkerLen) . "\<CR>"
-    endif
-
-    let s:isStarSearch = 0
-    let s:quickSearchPattern = strpart(getcmdline(), 0, strlen(getcmdline()) - s:NoHistoryMarkerLen)
-
-    if s:isOperatorPendingSearch
-	let s:isOperatorPendingSearch = 0
-	" If this search is part of an operator (e.g. "d/foo<S-CR>"), we have to
-	" execute the search, so that the operator applies; canceling and
-	" jumping to the match won't do. (Canceling and re-executing via
-	" :execute v:operator . '/' . s:quickSearchPattern . "\<CR>" will still
-	" clobber the search history, we would have to write our own motion or
-	" at least come up with a visual selection up to the match.)
-	" Fortunately, we don't have to worry about what happens after the
-	" operator, and can happily append commands to remove the search pattern
-	" from the history.
-"****D echomsg '**** operator at' string(getpos('.'))
-	return repeat("\<BS>", s:NoHistoryMarkerLen) . "\<CR>:call histdel('search', -1)|let @/ = histget('search', -1)\<CR>"
-    else
-	" Note: Must use CTRL-C to abort search command-line; <Esc> somehow doesn't
-	" work.
-	return "\<C-c>:if ! SearchAsQuickJump#JumpAfterSearchCommand(" . l:isBackward . ") | echoerr ingo#err#Get() | endif\<CR>"
-    endif
-endfunction
-
-
 "- mappings -------------------------------------------------------------------
+
+nnoremap <silent> <Plug>SearchAsQuickJumpNext :<C-u>if ! SearchAsQuickJump#DoSearch(v:count1, 0)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>if ! SearchAsQuickJump#DoSearch(v:count1, 1)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
 
 " The quick search pattern should not pollute the normal search history.
 " However, Vim always appends to the history, even if command-line mode is
@@ -208,9 +124,10 @@ endfunction
 " not yet contained in the search history. We chose two obscure control
 " characters (CTRL-_ (0x1f) Unit Separator and CTRL-] (0x1d) Group Separator)
 " which are not valid Vim commands in command-line mode.
-let s:NoHistoryMarkerLen = 3
 cnoremap <SID>NoHistoryMarker <C-_><C-]>
-cnoremap <expr> <SID>QuickSearch <SID>QuickSearch()
+" Note: This needs to correspond to s:NoHistoryMarkerLen in
+" autoload/SearchAsQuickJump.vim
+cnoremap <expr> <SID>QuickSearch SearchAsQuickJump#QuickSearch()
 " If :cnoremap is used, the mapping doesn't trigger expansion of :cabbrev any
 " more. The only way to work around this is by using :cmap and prepending a
 " <Space> (which is considered part of the NoHistoryMarker and later removed
@@ -219,12 +136,12 @@ cmap <silent> <S-CR> <Space><SID>NoHistoryMarker<SID>QuickSearch
 
 
 if g:SearchAsQuickJump_DefineStarCommands
-nnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>if ! <SID>SearchCWord(1, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
-nnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>if ! <SID>SearchCWord(1, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
-nnoremap <silent> <Plug>SearchAsQuickJumpGStar :<C-u>if ! <SID>SearchCWord(0, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
-nnoremap <silent> <Plug>SearchAsQuickJumpGHash :<C-u>if ! <SID>SearchCWord(0, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
-vnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>if ! <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 0)<Bar>echoerr ingo#err#Get()<Bar>endif
-vnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>if ! <SID>SearchSelection(ingo#selection#Get(), v:count1, 0, 1)<Bar>echoerr ingo#err#Get()<Bar>endif
+nnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>if ! SearchAsQuickJump#SearchCWord(1, 0)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>if ! SearchAsQuickJump#SearchCWord(1, 1)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpGStar :<C-u>if ! SearchAsQuickJump#SearchCWord(0, 0)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
+nnoremap <silent> <Plug>SearchAsQuickJumpGHash :<C-u>if ! SearchAsQuickJump#SearchCWord(0, 1)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
+vnoremap <silent> <Plug>SearchAsQuickJumpStar  :<C-u>if ! SearchAsQuickJump#SearchSelection(ingo#selection#Get(), v:count1, 0, 0)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
+vnoremap <silent> <Plug>SearchAsQuickJumpHash  :<C-u>if ! SearchAsQuickJump#SearchSelection(ingo#selection#Get(), v:count1, 0, 1)<Bar>echoerr ingo#err#Get()<Bar>endif<CR>
 if ! hasmapto('<Plug>SearchAsQuickJumpStar', 'n')
     nmap q* <Plug>SearchAsQuickJumpStar
 endif
@@ -245,8 +162,8 @@ if ! hasmapto('<Plug>SearchAsQuickJumpHash', 'x')
 endif
 endif
 
-onoremap <expr> / <SID>OperatorPendingSearch('/')
-onoremap <expr> ? <SID>OperatorPendingSearch('?')
+onoremap <expr> / SearchAsQuickJump#OperatorPendingSearch('/')
+onoremap <expr> ? SearchAsQuickJump#OperatorPendingSearch('?')
 
 nmap <silent> goq <Plug>SearchAsQuickJumpNext
 nmap <silent> goQ <Plug>SearchAsQuickJumpPrev
