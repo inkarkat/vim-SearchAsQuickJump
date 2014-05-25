@@ -13,6 +13,11 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"	021	05-May-2014	FIX: The special control character <C-]> isn't
+"				inserted into command-line any more with Vim
+"				7.4.264 (works with 7.3.823), probably because
+"				of the |c_CTRL-]| command. Switch
+"				<SID>NoHistoryMarker to <C-_><C-_> instead.
 "	020	28-Apr-2014	FIX: Need to expose s:OperatorPendingSearch().
 "				FIX: Need to move s:NoHistoryMarkerLen.
 "	019	26-Apr-2014	Split off autoload script.
@@ -121,10 +126,10 @@ nnoremap <silent> <Plug>SearchAsQuickJumpPrev :<C-u>if ! SearchAsQuickJump#DoSea
 " mapping that triggers the quick jump, and later stripped off the search
 " pattern. The marker should be a string that the user would never enter on his
 " own, so that we can be reasonably sure that the resulting search pattern is
-" not yet contained in the search history. We chose two obscure control
-" characters (CTRL-_ (0x1f) Unit Separator and CTRL-] (0x1d) Group Separator)
-" which are not valid Vim commands in command-line mode.
-cnoremap <SID>NoHistoryMarker <C-_><C-]>
+" not yet contained in the search history. We choose an obscure control
+" character (CTRL-_ (0x1f) Unit Separator) which is not a valid Vim command in
+" command-line mode.
+cnoremap <SID>NoHistoryMarker <C-_><C-_>
 " Note: This needs to correspond to s:NoHistoryMarkerLen in
 " autoload/SearchAsQuickJump.vim
 cnoremap <expr> <SID>QuickSearch SearchAsQuickJump#QuickSearch()
