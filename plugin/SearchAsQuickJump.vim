@@ -187,8 +187,8 @@ endif
 
 try
     call SearchRepeat#Define(
-    \	"\<Plug>(SearchAsQuickJumpNext)", '/<S-CR>', 'q', '/quick/', 'Quick search forward', '',
-    \	"\<Plug>(SearchAsQuickJumpPrev)", '?<S-CR>', 'Q', '?quick?', 'Quick search backward', '',
+    \	'<Plug>(SearchAsQuickJumpNext)', '/<S-CR>', 'q', '/quick/', 'Quick search forward', '',
+    \	'<Plug>(SearchAsQuickJumpPrev)', '?<S-CR>', 'Q', '?quick?', 'Quick search backward', '',
     \	"2, {'hlsearch': 0}"
     \)
 catch /^Vim\%((\a\+)\)\=:E117/	" catch error E117: Unknown function
