@@ -191,7 +191,7 @@ try
     \	'<Plug>(SearchAsQuickJumpPrev)', '?<S-CR>', 'Q', '?quick?', 'Quick search backward', '',
     \	"2, {'hlsearch': 0}"
     \)
-catch /^Vim\%((\a\+)\)\=:E117/	" catch error E117: Unknown function
+catch /^Vim\%((\a\+)\)\=:E117:/	" catch error E117: Unknown function
 endtry
 
 let &cpo = s:save_cpo
