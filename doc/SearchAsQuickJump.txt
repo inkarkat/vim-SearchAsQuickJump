@@ -69,6 +69,10 @@ USAGE						     *SearchAsQuickJump-usage*
 			persistence of a normal search, which can still be
 			obtained by concluding the pattern input with the
 			default <CR> at the end.
+
+The special searches all start with 'go...' (mnemonic: "go once to special
+match"); and come in search forward (ending with lowercase letter) and search
+backward (uppercase letter) variants.
 								   *goq* *goQ*
 [count]goq / goQ	Search forward / backward to the [count]'th occurrence
 			of the quick search pattern. This is the equivalent to
@@ -110,7 +114,7 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES				      *SearchAsQuickJump-dependencies*
 
 - Requires Vim 7.0 or higher.
-- SearchRepeat.vim (vimscript #0000) plugin (optional)
+- SearchRepeat.vim (vimscript #4949) plugin (optional)
 
 ==============================================================================
 CONFIGURATION				     *SearchAsQuickJump-configuration*
@@ -149,7 +153,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2009-2012 Ingo Karkat
+Copyright: (C) 2009-2014 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
