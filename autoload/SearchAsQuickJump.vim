@@ -4,7 +4,7 @@
 "   - Requires Vim 7.0 or higher.
 "   - ingo/regexp.vim autoload script
 "   - SearchSpecial.vim autoload script
-"   - SearchSpecialCWord.vim autoload script
+"   - SearchSpecial/CWord.vim autoload script
 
 " Copyright: (C) 2009-2014 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -12,6 +12,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"	021	24-May-2014	Move SearchSpecialCWord.vim to
+"				SearchSpecial/CWord.vim.
 "	020	28-Apr-2014	FIX: Need to expose s:OperatorPendingSearch().
 "				FIX: Need to move s:NoHistoryMarkerLen.
 "	019	26-Apr-2014	Split off autoload script.
@@ -125,7 +127,7 @@ function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPo
     return SearchAsQuickJump#DoSearch(a:count, a:isBackward, a:cwordStartPosition)
 endfunction
 function! SearchAsQuickJump#SearchCWord( isWholeWordSearch, isBackward )
-    let l:cwordStartPosition = (a:isBackward ? SearchSpecialCWord#GetStartPosition(s:quickSearchPattern) : [])
+    let l:cwordStartPosition = (a:isBackward ? SearchSpecial#CWord#GetStartPosition(s:quickSearchPattern) : [])
     return s:SearchText(expand('<cword>'), v:count1, a:isWholeWordSearch, a:isBackward, l:cwordStartPosition)
 endfunction
 function! SearchAsQuickJump#SearchSelection( text, count, isWholeWordSearch, isBackward )
