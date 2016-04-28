@@ -7,12 +7,14 @@
 "   - ingo/selection.vim autoload script
 "   - SearchRepeat.vim autoload script (optional integration)
 
-" Copyright: (C) 2009-2015 Ingo Karkat
+" Copyright: (C) 2009-2016 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   2.00.024	29-Apr-2016	Adapt to changed SearchRepeat.vim version 2.00
+"				interface. Change activation mappings.
 "   1.00.023	31-Jan-2015	Allow to remap the <S-CR> cmap, too.
 "				Enable the star commands by default.
 "   1.00.022	26-May-2014	Adapt <Plug>-mapping naming.
@@ -184,7 +186,7 @@ if ! hasmapto('<Plug>(SearchAsQuickJumpNext)', 'n')
     nmap goq <Plug>(SearchAsQuickJumpNext)
 endif
 if ! hasmapto('<Plug>(SearchAsQuickJumpPrev)', 'n')
-    nmap goQ <Plug>(SearchAsQuickJumpPrev)
+    nmap gOq <Plug>(SearchAsQuickJumpPrev)
 endif
 
 
@@ -192,8 +194,8 @@ endif
 
 try
     call SearchRepeat#Define(
-    \	'<Plug>(SearchAsQuickJumpNext)', '/<S-CR>', 'q', '/quick/', 'Quick search forward', '',
-    \	'<Plug>(SearchAsQuickJumpPrev)', '?<S-CR>', 'Q', '?quick?', 'Quick search backward', '',
+    \	'<Plug>(SearchAsQuickJumpNext)', '<Plug>(SearchAsQuickJumpPrev)',
+    \   '/<S-CR>', 'q', 'quick', 'Quick search', '',
     \	"2, {'hlsearch': 0}"
     \)
 catch /^Vim\%((\a\+)\)\=:E117:/	" catch error E117: Unknown function
