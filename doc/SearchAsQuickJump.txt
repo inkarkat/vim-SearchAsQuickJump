@@ -38,7 +38,9 @@ How can this be reconciled? This plugin sets up alternative mappings to the
 command-line mode. By pressing <S-CR>, a quick search is triggered instead of
 a normal one. This quick search does not use search highlighting and the
 search pattern is not added to the search history, so it can be used without
-affecting the normal search.
+affecting the normal search. Likewise, in a non-search command-line, the
+executed command (for example, a |:substitute|) does not affect the current
+search pattern and search history.
 
 Next / previous matches can be jumped to via separate mappings, but not via
 the default |n| / |N| commands. (Even if the integration with the SearchRepeat
@@ -51,7 +53,11 @@ SOURCE									     *
 (Original Vim tip, Stack Overflow answer, ...)
 
 SEE ALSO								     *
-(Plugins offering complementary functionality, or plugins using this library.)
+
+- The SearchAlternateStar plugin (vimscript #0000) provides <Tab> / <S-Tab>
+  commands that are similar to the optional q* / q# commands provided by this
+  plugin. They also don't affect the current search; additionally, they don't
+  add to the |jumplist|, and do nifty reselection in visual mode.
 
 RELATED WORKS								     *
 (Alternatives from other authors, other approaches, references not used here.)
@@ -69,6 +75,11 @@ USAGE						     *SearchAsQuickJump-usage*
 			persistence of a normal search, which can still be
 			obtained by concluding the pattern input with the
 			default <CR> at the end.
+			In the :... Ex command-line (and also >... debug
+			command-line), any change to the search pattern and
+			history is undone. For example, this is useful to do a
+			substitution without affecting the current search: >
+			/foo<CR> :s/X/Y/<S-CR> n (keep searching for "foo")
 
 The special searches all start with 'go...' (mnemonic: "go once to special
 match"); and come in search forward (ending with lowercase letter) and search
@@ -120,13 +131,28 @@ DEPENDENCIES				      *SearchAsQuickJump-dependencies*
 CONFIGURATION				     *SearchAsQuickJump-configuration*
 
 For a permanent configuration, put the following commands into your |vimrc|:
-If you want commands like the built-in '*', 'g*', '#' and 'g#' commands (but
-prefixed with 'q'), use: >
-    :let g:SearchAsQuickJump_DefineStarCommands = 1
+
+If you don't want additional commands like the built-in '*', 'g*', '#' and
+'g#' commands (but prefixed with 'q' and not affecting the current search),
+use: >
+    :let g:SearchAsQuickJump_DefineStarCommands = 0
 <
 						     *SearchAsQuickJump-remap*
-plugmap
+If you want to use different mappings, map your keys to the
+<Plug>(SearchAsQuickJump...) mapping targets _before_ sourcing the script
+(e.g. in your |vimrc|): >
+    cmap <S-CR> <Plug>(SearchAsQuickJump)
 
+    nmap q* <Plug>(SearchAsQuickJumpStar)
+    nmap q# <Plug>(SearchAsQuickJumpHash)
+    nmap gq* <Plug>(SearchAsQuickJumpGStar)
+    nmap gq# <Plug>(SearchAsQuickJumpGHash)
+    xmap q* <Plug>(SearchAsQuickJumpStar)
+    xmap q# <Plug>(SearchAsQuickJumpHash)
+
+    nmap goq <Plug>(SearchAsQuickJumpNext)
+    nmap goQ <Plug>(SearchAsQuickJumpPrev)
+<
 ==============================================================================
 INTEGRATION				       *SearchAsQuickJump-integration*
 
@@ -153,7 +179,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2009-2014 Ingo Karkat
+Copyright: (C) 2009-2015 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
