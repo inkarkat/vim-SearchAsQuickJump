@@ -7,12 +7,14 @@
 "   - ingo/selection.vim autoload script
 "   - SearchRepeat.vim autoload script (optional integration)
 
-" Copyright: (C) 2009-2014 Ingo Karkat
+" Copyright: (C) 2009-2015 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.00.023	31-Jan-2015	Allow to remap the <S-CR> cmap, too.
+"				Enable the star commands by default.
 "   1.00.022	26-May-2014	Adapt <Plug>-mapping naming.
 "				Make go... mappings configurable.
 "				Adapt to polished SearchRepeat interface.
@@ -109,7 +111,7 @@ set cpo&vim
 "- configuration --------------------------------------------------------------
 
 if ! exists('g:SearchAsQuickJump_DefineStarCommands')
-    let g:SearchAsQuickJump_DefineStarCommands = 0
+    let g:SearchAsQuickJump_DefineStarCommands = 1
 endif
 
 
@@ -142,7 +144,10 @@ cnoremap <expr> <SID>(QuickSearch) SearchAsQuickJump#QuickSearch()
 " more. The only way to work around this is by using :cmap and prepending a
 " <Space> (which is considered part of the NoHistoryMarker and later removed
 " with it).
-cmap <silent> <S-CR> <Space><SID>(NoHistoryMarker)<SID>(QuickSearch)
+cmap <silent> <Plug>(SearchAsQuickJump) <Space><SID>(NoHistoryMarker)<SID>(QuickSearch)
+if ! hasmapto('<Plug>(SearchAsQuickJump)', 'c')
+    cmap <S-CR> <Plug>(SearchAsQuickJump)
+endif
 
 
 if g:SearchAsQuickJump_DefineStarCommands
