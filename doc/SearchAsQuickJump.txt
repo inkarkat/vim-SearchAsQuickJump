@@ -54,7 +54,7 @@ SOURCE									     *
 
 SEE ALSO								     *
 
-- The SearchAlternateStar plugin (vimscript #0000) provides <Tab> / <S-Tab>
+- The SearchAlternateStar.vim plugin (vimscript #0000) has <Tab> / <S-Tab>
   commands that are similar to the optional q* / q# commands provided by this
   plugin. They also don't affect the current search; additionally, they don't
   add to the |jumplist|, and do nifty reselection in visual mode.
@@ -181,7 +181,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2009-2016 Ingo Karkat
+Copyright: (C) 2009-2017 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
