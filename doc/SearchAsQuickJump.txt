@@ -58,6 +58,8 @@ SEE ALSO								     *
   commands that are similar to the optional q* / q# commands provided by this
   plugin. They also don't affect the current search; additionally, they don't
   add to the |jumplist|, and do nifty reselection in visual mode.
+- Check out the |SearchSpecial.vim| plugin page (vimscript #4948) for a full
+  list of special searches powered by it.
 
 RELATED WORKS								     *
 (Alternatives from other authors, other approaches, references not used here.)
@@ -82,9 +84,9 @@ USAGE						     *SearchAsQuickJump-usage*
 			/foo<CR> :s/X/Y/<S-CR> n (keep searching for "foo")
 
 The special searches all start with 'go...' (mnemonic: "go once to special
-match"); and come in search forward (ending with lowercase letter) and search
-backward (uppercase letter) variants.
-								   *goq* *goQ*
+match"); and come in search forward (go...) and backward (gO...) variants.
+
+								   *goq* *gOq*
 [count]goq / goQ	Search forward / backward to the [count]'th occurrence
 			of the quick search pattern. This is the equivalent to
 			the default |n| / |N| search repeat commands.
@@ -105,12 +107,6 @@ gq*, gq#		Like above, but don't put "\<" and "\>" around the
 			|#| commands. Like with them, 'ignorecase' is used,
 			'smartcase' is not.
 
-If the SearchRepeat plugin is installed, a parallel set of "go now and for
-next searches" mappings (starting with 'gn...' instead of 'go...') is
-installed. These mappings have the same effect, but in addition re-program the
-'n/N' keys to repeat this particular search (until another gn... search is
-used).
-
 ==============================================================================
 INSTALLATION				      *SearchAsQuickJump-installation*
 
@@ -125,7 +121,16 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES				      *SearchAsQuickJump-dependencies*
 
 - Requires Vim 7.0 or higher.
-- SearchRepeat.vim (vimscript #4949) plugin (optional)
+- SearchRepeat.vim (vimscript #4949) plugin, version 2.00 or higher (optional)
+
+==============================================================================
+INTEGRATION				       *SearchAsQuickJump-integration*
+
+If the SearchRepeat plugin is installed, a parallel set of "go now and for
+next searches" mappings (starting with 'gn...' instead of 'go...') is
+installed. These mappings have the same effect, but in addition re-program the
+'n/N' keys to repeat this particular search (until another gn... search is
+used).
 
 ==============================================================================
 CONFIGURATION				     *SearchAsQuickJump-configuration*
@@ -151,11 +156,8 @@ If you want to use different mappings, map your keys to the
     xmap q# <Plug>(SearchAsQuickJumpHash)
 
     nmap goq <Plug>(SearchAsQuickJumpNext)
-    nmap goQ <Plug>(SearchAsQuickJumpPrev)
+    nmap gOq <Plug>(SearchAsQuickJumpPrev)
 <
-==============================================================================
-INTEGRATION				       *SearchAsQuickJump-integration*
-
 ==============================================================================
 LIMITATIONS				       *SearchAsQuickJump-limitations*
 
@@ -179,7 +181,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2009-2015 Ingo Karkat
+Copyright: (C) 2009-2016 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
