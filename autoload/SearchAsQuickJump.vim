@@ -6,12 +6,16 @@
 "   - SearchSpecial.vim autoload script
 "   - SearchSpecial/CWord.vim autoload script
 
-" Copyright: (C) 2009-2014 Ingo Karkat
+" Copyright: (C) 2009-2015 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.00.022	31-Jan-2015	ENH: For Ex or debug command-line, also restore
+"				the previous search pattern. This allows to
+"				execute commands like :s without affecting the
+"				current search.
 "	021	24-May-2014	Move SearchSpecialCWord.vim to
 "				SearchSpecial/CWord.vim.
 "	020	28-Apr-2014	FIX: Need to expose s:OperatorPendingSearch().
@@ -144,15 +148,32 @@ function! SearchAsQuickJump#JumpAfterSearchCommand( isBackward )
 
     return SearchAsQuickJump#DoSearch(l:count, a:isBackward)
 endfunction
+let s:previousSearchPattern = ''
+function! SearchAsQuickJump#RestorePreviousSearch()
+    if @/ !=# s:previousSearchPattern
+	if @/ ==# histget('search', -1)
+	    call histdel('search', -1)
+	endif
+	let @/ = s:previousSearchPattern
+    endif
+endfunction
+
 let s:NoHistoryMarkerLen = 3
 function! SearchAsQuickJump#QuickSearch()
-    if getcmdtype() ==# '/'
+    let l:cmdtype= getcmdtype()
+    if l:cmdtype ==# '/'
 	let l:isBackward = 0
-    elseif getcmdtype() ==# '?'
+    elseif l:cmdtype ==# '?'
 	let l:isBackward = 1
+    elseif l:cmdtype =~# '[:>]'
+	" Remove the history marker and conclude the command line with a normal
+	" <Enter>. Then, restore the current search pattern if the executed
+	" command (e.g. :s) has changed it.
+	let s:previousSearchPattern = @/
+	return repeat("\<BS>", s:NoHistoryMarkerLen) . "\<CR>:call SearchAsQuickJump#RestorePreviousSearch()\<CR>"
     else
-	" This is no search, remove the history marker and conclude the command
-	" line with a normal Enter.
+	" Remove the history marker and conclude the command line with a normal
+	" <Enter>.
 	return repeat("\<BS>", s:NoHistoryMarkerLen) . "\<CR>"
     endif
 
