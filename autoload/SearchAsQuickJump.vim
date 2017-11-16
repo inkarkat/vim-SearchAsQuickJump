@@ -6,12 +6,16 @@
 "   - SearchSpecial.vim autoload script
 "   - SearchSpecial/CWord.vim autoload script
 
-" Copyright: (C) 2009-2015 Ingo Karkat
+" Copyright: (C) 2009-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   2.00.023	17-Nov-2017	Remove any search offset from the search
+"				pattern; the underlying
+"				SearchSpecial#SearchWithout() cannot directly
+"				handle that.
 "   1.00.022	31-Jan-2015	ENH: For Ex or debug command-line, also restore
 "				the previous search pattern. This allows to
 "				execute commands like :s without affecting the
@@ -128,6 +132,7 @@ endfunction
 function! s:SearchText( text, count, isWholeWordSearch, isBackward, cwordStartPosition )
     let s:isStarSearch = 1
     let s:quickSearchPattern = ingo#regexp#FromLiteralText(a:text, a:isWholeWordSearch, '')
+    let s:quickSearchOffset = ''
     return SearchAsQuickJump#DoSearch(a:count, a:isBackward, a:cwordStartPosition)
 endfunction
 function! SearchAsQuickJump#SearchCWord( isWholeWordSearch, isBackward )
@@ -178,7 +183,12 @@ function! SearchAsQuickJump#QuickSearch()
     endif
 
     let s:isStarSearch = 0
-    let s:quickSearchPattern = strpart(getcmdline(), 0, strlen(getcmdline()) - s:NoHistoryMarkerLen)
+    let l:quickSearch = strpart(getcmdline(), 0, strlen(getcmdline()) - s:NoHistoryMarkerLen)
+    if l:cmdtype =~# '^[/?]$'
+	let [s:quickSearchPattern, s:quickSearchOffset] = matchlist(l:quickSearch, '^\(.\{-}\)\%(\%(\%(^\|[^\\]\)\%(\\\\\)*\\\)\@<!' . l:cmdtype . '\(.*\)\)\?$')[1:2]
+    else
+	let [s:quickSearchPattern, s:quickSearchOffset] = [l:quickSearch, '']
+    endif
 
     if s:isOperatorPendingSearch
 	let s:isOperatorPendingSearch = 0
