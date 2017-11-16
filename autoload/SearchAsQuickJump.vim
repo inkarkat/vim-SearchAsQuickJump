@@ -102,7 +102,7 @@
 "- use of SearchSpecial library -----------------------------------------------
 
 function! SearchAsQuickJump#DoSearch( count, isBackward, ... )
-    return SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
+    return SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'additionalSearchFlags': 'e', 'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
 endfunction
 
 
