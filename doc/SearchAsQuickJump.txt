@@ -49,9 +49,6 @@ explicitly activated via the |gnq| / |gnQ| mapping. )
 
 HOW IT WORKS								     *
 
-SOURCE									     *
-(Original Vim tip, Stack Overflow answer, ...)
-
 SEE ALSO								     *
 
 - The SearchAlternateStar.vim plugin (vimscript #0000) has <Tab> / <S-Tab>
@@ -61,18 +58,15 @@ SEE ALSO								     *
 - Check out the |SearchSpecial.vim| plugin page (vimscript #4948) for a full
   list of special searches powered by it.
 
-RELATED WORKS								     *
-(Alternatives from other authors, other approaches, references not used here.)
-
 ==============================================================================
 USAGE						     *SearchAsQuickJump-usage*
 						  *SearchAsQuickJump-searches*
 /{pattern}[/]<S-CR>	When a search via |/| or |?| is sent off by pressing
-?{pattern}[?]<S-CR>	<S-CR>, a quick forward / backward search is performed.
-			Matches will not be highlighted via 'hlsearch', and
-			the search pattern will not be added to the search
-			history or used as the last pattern for |n| / |N|
-			search repeats.
+?{pattern}[?]<S-CR>	<S-CR>, a quick forward / backward search is
+			performed. Matches will not be highlighted via
+			'hlsearch', and the search pattern will not be added
+			to the search history or used as the last pattern for
+			|n| / |N| search repeats.
 			Use this for a quick search without the formality and
 			persistence of a normal search, which can still be
 			obtained by concluding the pattern input with the
@@ -101,7 +95,7 @@ gq*, gq#		Like above, but don't put "\<" and "\>" around the
 			not a whole word.
 {Visual}q*		Do a quick search forward / backward for the [count]'th
 {Visual}q#	    	occurrence of the current selection, like the built-in
-			|g*| and |g#| commands.
+			|gstar| and |g#| commands.
 
 			These mappings are based on the built-in |star| and
 			|#| commands. Like with them, 'ignorecase' is used,
@@ -110,10 +104,16 @@ gq*, gq#		Like above, but don't put "\<" and "\>" around the
 ==============================================================================
 INSTALLATION				      *SearchAsQuickJump-installation*
 
-This script is packaged as a |vimball|. If you have the "gunzip" decompressor
-in your PATH, simply edit the *.vmb.gz package in Vim; otherwise, decompress
-the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
-vimball or via the |:UseVimball| command. >
+The code is hosted in a Git repo at
+    https://github.com/inkarkat/vim-SearchAsQuickJump
+You can use your favorite plugin manager, or "git clone" into a directory used
+for Vim |packages|. Releases are on the "stable" branch, the latest unstable
+development snapshot on "master".
+
+This script is also packaged as a |vimball|. If you have the "gunzip"
+decompressor in your PATH, simply edit the *.vmb.gz package in Vim; otherwise,
+decompress the archive first, e.g. using WinZip. Inside Vim, install by
+sourcing the vimball or via the |:UseVimball| command. >
     vim SearchAsQuickJump*.vmb.gz
     :so %
 To uninstall, use the |:RmVimball| command.
@@ -170,6 +170,12 @@ TODO						      *SearchAsQuickJump-todo*
 - Handle {offset}.
 
 IDEAS						     *SearchAsQuickJump-ideas*
+
+CONTRIBUTING					*SearchAsQuickJump-contribute*
+
+Report any bugs, send patches, or suggest features via the issue tracker at
+https://github.com/inkarkat/vim-SearchAsQuickJump/issues or email (address
+below).
 
 ==============================================================================
 HISTORY						   *SearchAsQuickJump-history*
