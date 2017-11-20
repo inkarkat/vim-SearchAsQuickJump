@@ -15,12 +15,12 @@ Unfortunately, there's a tension in how to configure the search-related
 settings: For quick searches, highlighting of matches is not important, as my
 eyes are already focused on the target text, I just want to get there with the
 fewest keystrokes, and figured that a search for "/:le" is faster than
-"3fA4whhh". Because the search pattern is mostly incomplete made-up rubbish,
-the highlighting should not continue to distract after the search; it should
-be off (but 'incsearch' helps to recognize when enough of the pattern is typed
-to reach the desired location). Likewise, the search pattern is useless in the
-search history and as the last pattern for the n command, as I am unlikely
-to repeat that search. On the other hand, for actual searches, history recall,
+"3fA4whhh". Because the search pattern is mostly incomplete, the highlighting
+should not continue to distract after the search; it should be off (but
+'incsearch' helps to recognize when enough of the pattern is typed to reach
+the desired location). Likewise, the search pattern is useless in the search
+history and as the last pattern for the n command, as I am unlikely to
+repeat that search. On the other hand, for actual searches, history recall,
 repeated search and highlighting of matches are vital and central to the task.
 
 How can this be reconciled? This plugin sets up alternative mappings to the
@@ -162,8 +162,8 @@ below).
 HISTORY
 ------------------------------------------------------------------------------
 
-##### GOAL
-First published version.
+##### 1.00    20-Nov-2017
+- First published version.
 
 ##### 0.01    10-Jul-2009
 - Started development.

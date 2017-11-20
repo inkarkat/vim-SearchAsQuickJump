@@ -25,12 +25,12 @@ Unfortunately, there's a tension in how to configure the search-related
 settings: For quick searches, highlighting of matches is not important, as my
 eyes are already focused on the target text, I just want to get there with the
 fewest keystrokes, and figured that a search for "/:le" is faster than
-"3fA4whhh". Because the search pattern is mostly incomplete made-up rubbish,
-the highlighting should not continue to distract after the search; it should
-be off (but 'incsearch' helps to recognize when enough of the pattern is typed
-to reach the desired location). Likewise, the search pattern is useless in the
-search history and as the last pattern for the |n| command, as I am unlikely
-to repeat that search. On the other hand, for actual searches, history recall,
+"3fA4whhh". Because the search pattern is mostly incomplete, the highlighting
+should not continue to distract after the search; it should be off (but
+'incsearch' helps to recognize when enough of the pattern is typed to reach
+the desired location). Likewise, the search pattern is useless in the search
+history and as the last pattern for the |n| command, as I am unlikely to
+repeat that search. On the other hand, for actual searches, history recall,
 repeated search and highlighting of matches are vital and central to the task.
 
 How can this be reconciled? This plugin sets up alternative mappings to the
@@ -46,8 +46,6 @@ Next / previous matches can be jumped to via separate mappings, but not via
 the default |n| / |N| commands. (Even if the integration with the SearchRepeat
 plugin is used; contrary to most other integrations, this quick search must be
 explicitly activated via the |gnq| / |gnQ| mapping. )
-
-HOW IT WORKS								     *
 
 SEE ALSO								     *
 
@@ -182,7 +180,7 @@ below).
 ==============================================================================
 HISTORY						   *SearchAsQuickJump-history*
 
-GOAL
+1.00	20-Nov-2017
 First published version.
 
 0.01	10-Jul-2009
