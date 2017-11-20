@@ -1,0 +1,3 @@
+autoload/SearchAsQuickJump.vim
+plugin/SearchAsQuickJump.vim
+doc/SearchAsQuickJump.txt
