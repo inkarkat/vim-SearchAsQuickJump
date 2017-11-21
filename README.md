@@ -106,7 +106,7 @@ To uninstall, use the :RmVimball command.
 ### DEPENDENCIES
 
 - Requires Vim 7.0 or higher.
-- Requires the SearchSpecial.vim plugin ([vimscript #4948](http://www.vim.org/scripts/script.php?script_id=4948)), version 1.10 or
+- Requires the SearchSpecial.vim plugin ([vimscript #4948](http://www.vim.org/scripts/script.php?script_id=4948)), version 1.20 or
   higher.
 - SearchRepeat.vim ([vimscript #4949](http://www.vim.org/scripts/script.php?script_id=4949)) plugin, version 2.00 or higher (optional)
 
@@ -146,14 +146,8 @@ If you want to use different mappings, map your keys to the
     nmap goq <Plug>(SearchAsQuickJumpNext)
     nmap gOq <Plug>(SearchAsQuickJumpPrev)
 
-TODO
+CONTRIBUTING
 ------------------------------------------------------------------------------
-
-- Handle trailing /, ?.
-- Warning if {offset} is specified.
-- Handle {offset}.
-
-### CONTRIBUTING
 
 Report any bugs, send patches, or suggest features via the issue tracker at
 https://github.com/inkarkat/vim-SearchAsQuickJump/issues or email (address
@@ -161,6 +155,10 @@ below).
 
 HISTORY
 ------------------------------------------------------------------------------
+
+##### 1.10    RELEASEME
+- ENH: Handle /.../{offset} (instead of just ignoring the {offset}).
+  __You need to update to SearchSpecial.vim ([vimscript #4948](http://www.vim.org/scripts/script.php?script_id=4948)) version 1.20!__
 
 ##### 1.00    20-Nov-2017
 - First published version.

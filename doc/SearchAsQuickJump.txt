@@ -119,7 +119,7 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES				      *SearchAsQuickJump-dependencies*
 
 - Requires Vim 7.0 or higher.
-- Requires the |SearchSpecial.vim| plugin (vimscript #4948), version 1.10 or
+- Requires the |SearchSpecial.vim| plugin (vimscript #4948), version 1.20 or
   higher.
 - SearchRepeat.vim (vimscript #4949) plugin, version 2.00 or higher (optional)
 
@@ -165,10 +165,6 @@ KNOWN PROBLEMS				    *SearchAsQuickJump-known-problems*
 
 TODO						      *SearchAsQuickJump-todo*
 
-- Handle trailing /, ?.
-- Warning if {offset} is specified.
-- Handle {offset}.
-
 IDEAS						     *SearchAsQuickJump-ideas*
 
 CONTRIBUTING					*SearchAsQuickJump-contribute*
@@ -179,6 +175,10 @@ below).
 
 ==============================================================================
 HISTORY						   *SearchAsQuickJump-history*
+
+1.10	RELEASEME
+- ENH: Handle /.../{offset} (instead of just ignoring the {offset}).
+  *** You need to update to SearchSpecial.vim (vimscript #4948) version 1.20! ***
 
 1.00	20-Nov-2017
 First published version.
