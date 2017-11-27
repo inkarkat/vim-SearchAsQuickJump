@@ -2,10 +2,10 @@
 "
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
-"   - ingo/regexp.vim autoload script
 "   - SearchSpecial.vim autoload script
 "   - SearchSpecial/CWord.vim autoload script
-"   - SearchSpecial/Offset.vim autoload script
+"   - ingo/err.vim autoload script
+"   - ingo/regexp.vim autoload script
 
 " Copyright: (C) 2009-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -17,14 +17,11 @@ set cpo&vim
 "- use of SearchSpecial library -----------------------------------------------
 
 function! SearchAsQuickJump#DoSearch( count, isBackward, ... )
-    let [l:offsetSearchFlags, l:BeforeFirstSearchAction, l:AfterFinalSearchAction] = SearchSpecial#Offset#GetAction(s:quickSearchOffset)
     return SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count,
     \   {
     \       'isStarSearch': s:isStarSearch,
     \       'currentMatchPosition': (a:0 ? a:1 : []),
-    \       'additionalSearchFlags': l:offsetSearchFlags,
-    \       'BeforeFirstSearchAction': l:BeforeFirstSearchAction,
-    \       'AfterFinalSearchAction': l:AfterFinalSearchAction,
+    \       'searchOffset': s:quickSearchOffset,
     \   }
     \)
 endfunction
