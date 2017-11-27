@@ -22,7 +22,7 @@ function! SearchAsQuickJump#DoSearch( count, isBackward, ... )
     \   {
     \       'isStarSearch': s:isStarSearch,
     \       'currentMatchPosition': (a:0 ? a:1 : []),
-    \       'additionalSearchFlags': 'e' . l:offsetSearchFlags,
+    \       'additionalSearchFlags': l:offsetSearchFlags,
     \       'BeforeFirstSearchAction': l:BeforeFirstSearchAction,
     \       'AfterFinalSearchAction': l:AfterFinalSearchAction,
     \   }
