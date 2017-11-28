@@ -45,7 +45,7 @@ search pattern and search history.
 Next / previous matches can be jumped to via separate mappings, but not via
 the default |n| / |N| commands. (Even if the integration with the SearchRepeat
 plugin is used; contrary to most other integrations, this quick search must be
-explicitly activated via the |gnq| / |gnQ| mapping. )
+explicitly activated via the |gnq| / |gNq| mapping. )
 
 SEE ALSO								     *
 
@@ -79,7 +79,7 @@ The special searches all start with 'go...' (mnemonic: "go once to special
 match"); and come in search forward (go...) and backward (gO...) variants.
 
 								   *goq* *gOq*
-[count]goq / goQ	Search forward / backward to the [count]'th occurrence
+[count]goq / gOq	Search forward / backward to the [count]'th occurrence
 			of the quick search pattern. This is the equivalent to
 			the default |n| / |N| search repeat commands.
 
