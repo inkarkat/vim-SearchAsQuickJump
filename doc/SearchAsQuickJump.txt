@@ -55,6 +55,8 @@ SEE ALSO								     *
   add to the |jumplist|, and do nifty reselection in visual mode.
 - Check out the |SearchSpecial.vim| plugin page (vimscript #4948) for a full
   list of special searches powered by it.
+- Check out the |SearchRepeat.vim| plugin page (vimscript #4949) for a full
+  list of custom searches that integrate with it.
 
 ==============================================================================
 USAGE						     *SearchAsQuickJump-usage*
