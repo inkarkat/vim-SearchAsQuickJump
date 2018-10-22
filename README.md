@@ -169,7 +169,7 @@ below).
 HISTORY
 ------------------------------------------------------------------------------
 
-##### 1.10    RELEASEME
+##### 1.10    22-Oct-2018
 - ENH: Handle /.../{offset} (instead of just ignoring the {offset}).
   __You need to update to SearchSpecial.vim ([vimscript #4948](http://www.vim.org/scripts/script.php?script_id=4948)) version 1.20!__
 
