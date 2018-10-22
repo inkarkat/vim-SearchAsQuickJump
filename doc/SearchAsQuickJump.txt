@@ -45,7 +45,7 @@ search pattern and search history.
 Next / previous matches can be jumped to via separate mappings, but not via
 the default |n| / |N| commands. (Even if the integration with the SearchRepeat
 plugin is used; contrary to most other integrations, this quick search must be
-explicitly activated via the |gnq| / |gnQ| mapping. )
+explicitly activated via the |gnq| / |gNq| mapping. )
 
 SEE ALSO								     *
 
@@ -55,6 +55,8 @@ SEE ALSO								     *
   add to the |jumplist|, and do nifty reselection in visual mode.
 - Check out the |SearchSpecial.vim| plugin page (vimscript #4948) for a full
   list of special searches powered by it.
+- Check out the |SearchRepeat.vim| plugin page (vimscript #4949) for a full
+  list of custom searches that integrate with it.
 
 ==============================================================================
 USAGE						     *SearchAsQuickJump-usage*
@@ -79,7 +81,7 @@ The special searches all start with 'go...' (mnemonic: "go once to special
 match"); and come in search forward (go...) and backward (gO...) variants.
 
 								   *goq* *gOq*
-[count]goq / goQ	Search forward / backward to the [count]'th occurrence
+[count]goq / gOq	Search forward / backward to the [count]'th occurrence
 			of the quick search pattern. This is the equivalent to
 			the default |n| / |N| search repeat commands.
 
@@ -119,7 +121,7 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES				      *SearchAsQuickJump-dependencies*
 
 - Requires Vim 7.0 or higher.
-- Requires the |SearchSpecial.vim| plugin (vimscript #4948), version 1.10 or
+- Requires the |SearchSpecial.vim| plugin (vimscript #4948), version 1.20 or
   higher.
 - SearchRepeat.vim (vimscript #4949) plugin, version 2.00 or higher (optional)
 
@@ -147,6 +149,13 @@ If you want to use different mappings, map your keys to the
 <Plug>(SearchAsQuickJump...) mapping targets _before_ sourcing the script
 (e.g. in your |vimrc|): >
     cmap <S-CR> <Plug>(SearchAsQuickJump)
+Note that the default mapping only works in GVIM, but not in the terminal. A
+possible alternative would be this: >
+    cmap <C-g><CR> <Plug>(SearchAsQuickJump)
+You can also define different mappings for terminal and GVIM: >
+    if ! has('gui_running')
+	cmap <C-g><CR> <Plug>(SearchAsQuickJump)
+    endif
 
     nmap q* <Plug>(SearchAsQuickJumpStar)
     nmap q# <Plug>(SearchAsQuickJumpHash)
@@ -165,10 +174,6 @@ KNOWN PROBLEMS				    *SearchAsQuickJump-known-problems*
 
 TODO						      *SearchAsQuickJump-todo*
 
-- Handle trailing /, ?.
-- Warning if {offset} is specified.
-- Handle {offset}.
-
 IDEAS						     *SearchAsQuickJump-ideas*
 
 CONTRIBUTING					*SearchAsQuickJump-contribute*
@@ -180,6 +185,10 @@ below).
 ==============================================================================
 HISTORY						   *SearchAsQuickJump-history*
 
+1.10	22-Oct-2018
+- ENH: Handle /.../{offset} (instead of just ignoring the {offset}).
+  *** You need to update to SearchSpecial.vim (vimscript #4948) version 1.20! ***
+
 1.00	20-Nov-2017
 First published version.
 
@@ -187,7 +196,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2009-2017 Ingo Karkat
+Copyright: (C) 2009-2018 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>

@@ -2,20 +2,30 @@
 "
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
-"   - ingo/regexp.vim autoload script
 "   - SearchSpecial.vim autoload script
 "   - SearchSpecial/CWord.vim autoload script
+"   - ingo/err.vim autoload script
+"   - ingo/regexp.vim autoload script
 
 " Copyright: (C) 2009-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
+let s:save_cpo = &cpo
+set cpo&vim
 
 "- use of SearchSpecial library -----------------------------------------------
 
 function! SearchAsQuickJump#DoSearch( count, isBackward, ... )
-    return SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count, {'additionalSearchFlags': 'e', 'isStarSearch': s:isStarSearch, 'currentMatchPosition': (a:0 ? a:1 : [])})
+    return SearchSpecial#SearchWithout(s:quickSearchPattern, a:isBackward, '', 'quick', '', a:count,
+    \   {
+    \       'isStarSearch': s:isStarSearch,
+    \       'currentMatchPosition': (a:0 ? a:1 : []),
+    \       'searchOffset': s:quickSearchOffset,
+    \   }
+    \)
 endfunction
+
 
 
 "- other functions ------------------------------------------------------------
@@ -122,4 +132,6 @@ function! SearchAsQuickJump#QuickSearch()
     endif
 endfunction
 
+let &cpo = s:save_cpo
+unlet s:save_cpo
 " vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
