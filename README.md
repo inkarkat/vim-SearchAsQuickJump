@@ -24,7 +24,7 @@ repeat that search. On the other hand, for actual searches, history recall,
 repeated search and highlighting of matches are vital and central to the task.
 
 How can this be reconciled? This plugin sets up alternative mappings to the
- CR> key which normally concludes entering of the search pattern in
+<CR> key which normally concludes entering of the search pattern in
 command-line mode. By pressing <S-CR>, a quick search is triggered instead of
 a normal one. This quick search does not use search highlighting and the
 search pattern is not added to the search history, so it can be used without
@@ -35,12 +35,14 @@ search pattern and search history.
 Next / previous matches can be jumped to via separate mappings, but not via
 the default n / N commands. (Even if the integration with the SearchRepeat
 plugin is used; contrary to most other integrations, this quick search must be
-explicitly activated via the gnq / gnQ mapping. )
+explicitly activated via the gnq / gNq mapping. )
 
 ### SEE ALSO
 
 - Check out the SearchSpecial.vim plugin page ([vimscript #4948](http://www.vim.org/scripts/script.php?script_id=4948)) for a full
   list of special searches powered by it.
+- Check out the SearchRepeat.vim plugin page ([vimscript #4949](http://www.vim.org/scripts/script.php?script_id=4949)) for a full
+  list of custom searches that integrate with it.
 
 USAGE
 ------------------------------------------------------------------------------
@@ -64,7 +66,7 @@ USAGE
     The special searches all start with 'go...' (mnemonic: "go once to special
     match"); and come in search forward (go...) and backward (gO...) variants.
 
-    [count]goq / goQ        Search forward / backward to the [count]'th occurrence
+    [count]goq / gOq        Search forward / backward to the [count]'th occurrence
                             of the quick search pattern. This is the equivalent to
                             the default n / N search repeat commands.
 
@@ -131,10 +133,21 @@ use:
     :let g:SearchAsQuickJump_DefineStarCommands = 0
 
 If you want to use different mappings, map your keys to the
- Plug>(SearchAsQuickJump...) mapping targets _before_ sourcing the script
+<Plug>(SearchAsQuickJump...) mapping targets _before_ sourcing the script
 (e.g. in your vimrc):
 
     cmap <S-CR> <Plug>(SearchAsQuickJump)
+
+Note that the default mapping only works in GVIM, but not in the terminal. A
+possible alternative would be this:
+
+    cmap <C-g><CR> <Plug>(SearchAsQuickJump)
+
+You can also define different mappings for terminal and GVIM:
+
+    if ! has('gui_running')
+        cmap <C-g><CR> <Plug>(SearchAsQuickJump)
+    endif
 
     nmap q* <Plug>(SearchAsQuickJumpStar)
     nmap q# <Plug>(SearchAsQuickJumpHash)
@@ -167,7 +180,7 @@ HISTORY
 - Started development.
 
 ------------------------------------------------------------------------------
-Copyright: (C) 2009-2017 Ingo Karkat -
+Copyright: (C) 2009-2018 Ingo Karkat -
 The [VIM LICENSE](http://vimdoc.sourceforge.net/htmldoc/uganda.html#license) applies to this plugin.
 
 Maintainer:     Ingo Karkat <ingo@karkat.de>

@@ -149,6 +149,13 @@ If you want to use different mappings, map your keys to the
 <Plug>(SearchAsQuickJump...) mapping targets _before_ sourcing the script
 (e.g. in your |vimrc|): >
     cmap <S-CR> <Plug>(SearchAsQuickJump)
+Note that the default mapping only works in GVIM, but not in the terminal. A
+possible alternative would be this: >
+    cmap <C-g><CR> <Plug>(SearchAsQuickJump)
+You can also define different mappings for terminal and GVIM: >
+    if ! has('gui_running')
+	cmap <C-g><CR> <Plug>(SearchAsQuickJump)
+    endif
 
     nmap q* <Plug>(SearchAsQuickJumpStar)
     nmap q# <Plug>(SearchAsQuickJumpHash)
@@ -189,7 +196,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2009-2017 Ingo Karkat
+Copyright: (C) 2009-2018 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
